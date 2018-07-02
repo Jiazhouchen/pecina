@@ -1,103 +1,108 @@
-library(dplyr)
-library(readr)
-library(data.table)
-
-#Download database
-son1_all <- read_csv("~/Box/GitHub/Nfb_task/NFB_response/SON1&2_behav_results/son1_all.csv")
-View(son1_all)
-
-#Recode variables
-son1_all$plac_ctrl<- NA
-son1_all$plac_ctrl[son1_all$InfusionNum==1 | son1_all$InfusionNum==2] <- 1
-son1_all$plac_ctrl[son1_all$InfusionNum==3 | son1_all$InfusionNum==4] <- 0
-son1_all$plac_ctrl_r<-as.numeric(!son1_all$plac_ctrl)
-
-son1_all$reinf_cont <- NA
-son1_all$reinf_cont[son1_all$InfusionNum==1 | son1_all$InfusionNum==3] <- 1
-son1_all$reinf_cont[son1_all$InfusionNum==2 | son1_all$InfusionNum==4] <- 0
-son1_all$reinf_cont_r<-as.numeric(!son1_all$reinf_cont)
-
-son1_all$InfDur<-son1_all$WillImpOnset - son1_all$InfOnset
-son1_all$FeedDur<-son1_all$ImprovedOnset - son1_all$Feed2Onset
-
-#Mean centering variables
-center_scale <- function(x) {
-  scale(x, scale = FALSE)
+############################################
+####### New Functions for regressor ########
+############################################
+#Do a source script from git function
+source_script_github <- function(gitscripturl) {
+  # load package
+  require(RCurl)
+  # read script lines from website
+  script <- getURL(gitscripturl, ssl.verifypeer = FALSE, followlocation = TRUE)
+  # parse lines and evaluate in the global environment
+  eval(parse(text = script), envir= .GlobalEnv)
 }
 
-# apply it
-son1_all$twoLR_S_fixD_oneK_vt1_centered<- center_scale(df$twoLR_S_fixD_oneK_vt1)
-son1_all$twoLR_S_fixD_oneK_vt1shifted_centered<- center_scale(df$twoLR_S_fixD_oneK_vt1shifted)
+#Source the general generate evenet signals functions
+source_script_github("https://raw.githubusercontent.com/Jiazhouchen/fMRI_R/master/gen_eventsignal.R")
 
-son1_all$InfValue<-son1_all$twoLR_S_fixD_oneK_vt1shifted_centered * son1_all$plac_ctrl
-son1_all$NoInfValue<-son1_all$twoLR_S_fixD_oneK_vt1shifted_centered * ! son1_all$plac_ctrl
-
-son1_all$FeedValue<-son1_all$twoLR_S_fixD_oneK_vt1_centered * son1_all$reinf_cont
-son1_all$NoFeedValue<-son1_all$twoLR_S_fixD_oneK_vt1_centered * ! son1_all$reinf_cont
-
-son1_all$FeedPE<-son1_all$twoLR_S_fixD_oneK_PE * son1_all$reinf_cont
-son1_all$NoFeedPE<-son1_all$twoLR_S_fixD_oneK_PE * ! son1_all$reinf_cont
-
-#Rename database
-df<- son1_all
-
-#MODEL REGRESSORS
-
-#Value_8C Model
-# df.inf <- select(df, Participant, Run, administration, InfOnset, InfDur, plac_ctrl) %>% filter (administration=="1", plac_ctrl=="1")
-# df.noinf <- select(df, Participant, Run, administration, InfOnset, InfDur, plac_ctrl_r) %>% filter (administration=="1", plac_ctrl_r=="1")
-# df.fb <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, reinf_cont) %>% filter (administration=="1", reinf_cont=="1")
-# df.nofb <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, reinf_cont_r) %>% filter (administration=="1", reinf_cont_r=="1")
-# 
-# df.inf.value <- select(df, Participant, Run, administration, InfOnset, InfDur, InfValue, plac_ctrl) %>% filter (administration=="1", plac_ctrl=="1")
-# df.noinf.value <- select(df, Participant, Run, administration, InfOnset, InfDur, NoInfValue, plac_ctrl_r) %>% filter (administration=="1", plac_ctrl_r=="1")
-# df.fb.value <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, FeedValue, reinf_cont) %>% filter (administration=="1", reinf_cont=="1")
-# df.nofb.value <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, NoFeedValue, reinf_cont_r) %>% filter (administration=="1", reinf_cont_r=="1")
-
-#PE_8C Model
-# df.inf <- select(df, Participant, Run, administration, InfOnset, InfDur, plac_ctrl) %>% filter (administration=="1")
-# df.noinf <- select(df, Participant, Run, administration, InfOnset, InfDur, plac_ctrl_r) %>% filter (administration=="1")
-# df.fb <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, reinf_cont) %>% filter (administration=="1")
-# df.nofb <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, reinf_cont_r) %>% filter (administration=="1")
-# 
-# df.inf.value <- select(df, Participant, Run, administration, InfOnset, InfDur, InfValue) %>% filter (administration=="1")
-# df.noinf.value <- select(df, Participant, Run, administration, InfOnset, InfDur, NoInfValue) %>% filter (administration=="1")
-# df.fb.PE <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, FeedPE) %>% filter (administration=="1")
-# df.nofb.PE <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, NoFeedPE) %>% filter (administration=="1")
-
-#PE_8C Model_new
-df.inf <- select(df, Participant, Run, administration, InfOnset, InfDur, plac_ctrl) %>% filter (administration=="1", plac_ctrl=="1")
-df.noinf <- select(df, Participant, Run, administration, InfOnset, InfDur, plac_ctrl_r) %>% filter (administration=="1", plac_ctrl_r=="1")
-df.fb <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, reinf_cont) %>% filter (administration=="1", reinf_cont=="1")
-df.nofb <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, reinf_cont_r) %>% filter (administration=="1", reinf_cont_r=="1")
-
-df.inf.value <- select(df, Participant, Run, administration, InfOnset, InfDur, InfValue, plac_ctrl) %>% filter (administration=="1", plac_ctrl=="1")
-df.noinf.value <- select(df, Participant, Run, administration, InfOnset, InfDur, NoInfValue, plac_ctrl_r) %>% filter (administration=="1",plac_ctrl_r=="1")
-df.fb.PE <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, FeedPE, reinf_cont) %>% filter (administration=="1", reinf_cont=="1")
-df.nofb.PE <- select(df, Participant, Run, administration, Feed2Onset, FeedDur, NoFeedPE, reinf_cont_r) %>% filter (administration=="1", reinf_cont_r=="1")
-
-#Write Regressors
-setwd('~/Box/Github/Nfb_sonrisa/regs/R_fsl_reg/PE_8C/')
-
-#interaction(df.fb$Participant,df.fb$Run)->df.fb$term
-
-loopreg<-function(df=NULL,name.x=NULL,output.path="~/Box/Github/Nfb_sonrisa/regs/R_fsl_reg/PE_8C/",coltoget=c(4,5,6)) {
-  if (is.null(df)) {stop("NO DF")}
-  as.character(substitute(df))->dfname
-  interaction(df.fb$Participant,df.fb$Run)->df$term
-  df$term<-gsub(".","_a_run",df$term,fixed = T)
-  for (i in unique(df$term)) {
-    todo<-df[grep(i,df$term,fixed = T),coltoget]
-    write.table(todo,paste(output.path,i,"_",name.x,".txt",sep = ""), row.names=FALSE, col.names = FALSE, sep = "\t")
+#Load son1's sepcific functions here:
+prep.son1<-function(son1_single = NULL,
+                    regualrvarinames=c('Participant','ColorSet','Feed1Onset','Feed2Onset','Feed3Onset','Feedback',
+                                       'ImprovedOnset','ImprovedRespBin','ImprovedRespNum','ImprovedRespText','ImprovedRt',
+                                       'InfOnset','Infusion','InfusionNum','J1Onset','J1Seconds','J2Onset','J2Seconds',
+                                       'Jitter1','Jitter2','Run','TrialColor','TrialNum','Version','Waveform',
+                                       'WillImpOnset','WillImpRespBin','WillImpRespNum','WillImpRespText',
+                                       'WillImpRt','administration','subject_id','plac_ctrl','reinf_cont','plac','plac_ctrl_r','reinf_cont_r'),
+                    adminfilter=1) {
+  if (is.null(son1_all)) {stop("NO INPUT")}
+  son1_single<-son1_single[which(son1_single$administration==adminfilter),]
+  son1_single$plac_ctrl[son1_single$InfusionNum==1 | son1_single$InfusionNum==2] <- TRUE
+  son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
+  son1_single$plac_ctrl_r<-!son1_single$plac_ctrl
+  
+  son1_single$reinf_cont <- NA
+  son1_single$reinf_cont[son1_single$InfusionNum==1 | son1_single$InfusionNum==3] <- TRUE
+  son1_single$reinf_cont[son1_single$InfusionNum==2 | son1_single$InfusionNum==4] <- FALSE
+  son1_single$reinf_cont_r<-!son1_single$reinf_cont
+  
+  son1_single$InfDur<-son1_single$WillImpOnset - son1_single$InfOnset
+  son1_single$FeedDur<-son1_single$ImprovedOnset - son1_single$Feed2Onset
+  
+  vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
+  vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
+  #Add taskness variables to value
+  vba$plac_ctrl<-son1_single$plac_ctrl
+  vba$plac_ctrl_r<-son1_single$plac_ctrl_r
+  vba$reinf_cont<-son1_single$reinf_cont
+  vba$reinf_cont_r<-son1_single$reinf_cont_r
+  
+  finalist<-list(infusion=data.frame(event="infusion",
+                                     onset=son1_single$InfOnset,
+                                     duration=son1_single$WillImpOnset - son1_single$InfOnset,
+                                     run=son1_single$Run,
+                                     trial=son1_single$TrialNum),
+                 feedback=data.frame(event="feedback",
+                                     onset=son1_single$Feed2Onset,
+                                     duration=son1_single$ImprovedOnset - son1_single$Feed2Onset,
+                                     run=son1_single$Run,
+                                     trial=son1_single$TrialNum))
+  for (i in 1:length(finalist)) {
+    if (i==1) {ktz<-finalist[[i]]} else {
+      ktz<-rbind(ktz,finalist[[i]])}
   }
+  finalist[["allconcat"]]<-ktz
+  output<-list(event.list=finalist,output.df=son1_single,value=vba)
 }
 
-torun<-c("df.inf","df.noinf","df.fb", "df.nofb", "df.inf.value", "df.noinf.value", "df.fb.PE", "df.nofb.PE")
 
-lapply(torun, function(x) {
-  df.x<-get(x,envir = .GlobalEnv)
-  loopreg(df = df.x,name.x=x,output.path = "~/Box/Github/Nfb_sonrisa/regs/R_fsl_reg/PE_8C/")
-})
+
+#Get Data
+if (Sys.getenv("RSTUDIO_USER_IDENTITY")=="jiazhouchen") {boxdir <- "/Users/jiazhouchen/Box Sync"
+} else {boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)}
+
+son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
+
+#Here will start the single subject loop; but for now, temporaily do SON1_002;
+"SON1_002"->tid
+son1_single<-son1_all[which(son1_all$Participant %in% tid),]
+
+#Prep the data into generally acceptable output object;
+output<-prep.son1(son1_single = son1_single)
+
+#Generate signal with make signal with grid function (grid.csv need to be in working directory or specified otherwise)
+signals<-makesignalwithgrid(outputdata = output,add_taskness = F)
+
+#Create this model using centered scaled twoLR vba output and taskness regressors
+model.cs.twoLR<-list(#Add Taskness Regressors:
+                     infusion=signals$infusion, 
+                     noinfusion=signals$noinfusion,
+                     feedback=signals$feedback,
+                     nofeedback=signals$nofeedback,
+                     #Add VBA output Regressors:
+                     PEreinf=signals$twoLRPE_CS_reinf_cont,
+                     PEnoreinf=signals$twoLRPE_CS_reinf_cont_r,
+                     ValueInfus=signals$twoLRValueShifted_CS_plac_ctrl,
+                     ValueNoInfus=signals$twoLRValueShifted_CS_plac_ctrl_r)
+
+#Use Michael's package to generate design matrix and correlation graph;
+design.cs.twoLR<-dependlab::build_design_matrix(
+                                       events = output$event.list$allconcat, #Load the task info
+                                       signals = model.cs.twoLR,     #Load the Model
+                                       write_timing_files = c("convolved", "FSL"), #Output timing files to FSL style
+                                       tr=1.0,                      #tr=1 second, maybe need to double check, I'm kinda sure....
+                                       output_directory = getwd(), #Where to output the timing files, default is the working directory
+                                       nuisance_regressors = NULL #Maybe could add in nuisance_regressors from pre-proc
+                                       )
+
 
 
 
