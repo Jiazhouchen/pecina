@@ -79,24 +79,50 @@ son1_single<-son1_all[which(son1_all$Participant %in% tid),]
 output<-prep.son1(son1_single = son1_single)
 
 #Generate signal with make signal with grid function (grid.csv need to be in working directory or specified otherwise)
-signals<-makesignalwithgrid(outputdata = output,add_taskness = F)
+signals<-makesignalwithgrid(outputdata = output,add_taskness = T)
 
 #Create this model using centered scaled twoLR vba output and taskness regressors
-model.cs.twoLR<-list(#Add Taskness Regressors:
-                     infusion=signals$infusion, 
-                     noinfusion=signals$noinfusion,
-                     feedback=signals$feedback,
-                     nofeedback=signals$nofeedback,
-                     #Add VBA output Regressors:
-                     PEreinf=signals$twoLRPE_CS_reinf_cont,
-                     PEnoreinf=signals$twoLRPE_CS_reinf_cont_r,
-                     ValueInfus=signals$twoLRValueShifted_CS_plac_ctrl,
-                     ValueNoInfus=signals$twoLRValueShifted_CS_plac_ctrl_r)
+
+model.cs.twoLR<-list(
+  #Add Taskness Regressors:
+  infusion=signals$infusion, 
+  noinfusion=signals$noinfusion,
+  feedback=signals$feedback,
+  nofeedback=signals$nofeedback,
+  #Add VBA output Regressors:
+  PEreinf=signals$twoLRPE_CS_reinf_cont,
+  PEnoreinf=signals$twoLRPE_CS_reinf_cont_r,
+  ValueInfus=signals$twoLRValueShifted_CS_plac_ctrl,
+  ValueNoInfus=signals$twoLRValueShifted_CS_plac_ctrl_r)
+
+model.cs.twoLR.alt<-list(
+  #Add Taskness Regressors:
+  Infusion=signals$infusion_evt, 
+  ifinfusion=signals$infusion,
+  Feedback=signals$feedback_evt,
+  iffeedback=signals$feedback,
+  #Add VBA output Regressors:
+  PE=signals$twoLRPE_CS,
+  Value=signals$twoLRValueShifted_CS)
+
+model.cs.twoLR.all<-list(
+  #Add Taskness Regressors:
+  yesinfusion=signals$infusion, 
+  noinfusion=signals$noinfusion,
+  yesfeedback=signals$feedback,
+  nofeedback=signals$nofeedback,
+  Infusion=signals$infusion_evt,
+  Feedback=signals$feedback_evt,
+  #Add VBA output Regressors:
+  PEreinf=signals$twoLRPE_CS_reinf_cont,
+  PEnoreinf=signals$twoLRPE_CS_reinf_cont_r,
+  ValueInfus=signals$twoLRValueShifted_CS_plac_ctrl,
+  ValueNoInfus=signals$twoLRValueShifted_CS_plac_ctrl_r)
 
 #Use Michael's package to generate design matrix and correlation graph;
-design.cs.twoLR<-dependlab::build_design_matrix(
+design.cs.twoLR.all<-dependlab::build_design_matrix(
                                        events = output$event.list$allconcat, #Load the task info
-                                       signals = model.cs.twoLR,     #Load the Model
+                                       signals = model.cs.twoLR.all,     #Load the Model
                                        write_timing_files = c("convolved", "FSL"), #Output timing files to FSL style
                                        tr=1.0,                      #tr=1 second, maybe need to double check, I'm kinda sure....
                                        output_directory = getwd(), #Where to output the timing files, default is the working directory
