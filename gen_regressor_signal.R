@@ -120,15 +120,16 @@ model.cs.twoLR.all<-list(
   ValueNoInfus=signals$twoLRValueShifted_CS_plac_ctrl_r)
 
 #Use Michael's package to generate design matrix and correlation graph;
-design.cs.twoLR.all<-dependlab::build_design_matrix(
+design<-dependlab::build_design_matrix(
                                        events = output$event.list$allconcat, #Load the task info
-                                       signals = model.cs.twoLR.all,     #Load the Model
+                                       signals = model.cs.twoLR,     #Load the Model
                                        write_timing_files = c("convolved", "FSL"), #Output timing files to FSL style
                                        tr=1.0,                      #tr=1 second, maybe need to double check, I'm kinda sure....
                                        output_directory = getwd(), #Where to output the timing files, default is the working directory
                                        nuisance_regressors = NULL #Maybe could add in nuisance_regressors from pre-proc
                                        )
 
+make_heatmap_with_design(design)
 
 
 
