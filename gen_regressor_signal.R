@@ -123,7 +123,7 @@ model.cs.twoLR.all<-list(
 design<-dependlab::build_design_matrix(
                                        events = output$event.list$allconcat, #Load the task info
                                        signals = model.cs.twoLR,     #Load the Model
-                                       write_timing_files = c("convolved", "FSL"), #Output timing files to FSL style
+                                       #write_timing_files = c("convolved", "AFNI"), #Output timing files to FSL style
                                        tr=1.0,                      #tr=1 second, maybe need to double check, I'm kinda sure....
                                        output_directory = getwd(), #Where to output the timing files, default is the working directory
                                        nuisance_regressors = NULL #Maybe could add in nuisance_regressors from pre-proc
