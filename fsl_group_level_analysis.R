@@ -1,6 +1,6 @@
 ###SON1 FSL Group Level Analysis: 
 
-get_all_feat<-function(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+glvl_all_cope<-function(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
                        outputdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
                        modelname="PE_8C_old",
                        copestorun=1:8
@@ -46,3 +46,4 @@ lapply(cope.fslmerge,function(x) {
 
 print("DONE")
 }
+
