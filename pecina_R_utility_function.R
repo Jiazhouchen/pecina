@@ -1,4 +1,15 @@
-###SON1 FSL Group Level Analysis: 
+###
+
+source_script_github <- function(gitscripturl) {
+  # load package
+  require(RCurl)
+  # read script lines from website
+  script <- getURL(gitscripturl, ssl.verifypeer = FALSE, followlocation = TRUE)
+  # parse lines and evaluate in the global environment
+  eval(parse(text = script), envir= .GlobalEnv)
+}
+
+### FSL Group Level Analysis: 
 
 glvl_all_cope<-function(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
                        outputdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",

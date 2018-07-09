@@ -2,18 +2,16 @@
 ####### New Functions for regressor ########
 ############################################
 #Do a source script from git function
-source_script_github <- function(gitscripturl) {
-  # load package
-  require(RCurl)
-  # read script lines from website
-  script <- getURL(gitscripturl, ssl.verifypeer = FALSE, followlocation = TRUE)
-  # parse lines and evaluate in the global environment
-  eval(parse(text = script), envir= .GlobalEnv)
+if (file.exists("pecina_R_utility_function.R")){
+  source("pecina_R_utility_function.R")
+} else {
+  devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/pecina_R_utility_function.R")
 }
 
-#Source the general generate evenet signals functions
-source_script_github("https://raw.githubusercontent.com/Jiazhouchen/fMRI_R/master/gen_eventsignal.R")
+#Source the fMRI helper functions
+source_script_github("https://raw.githubusercontent.com/DecisionNeurosciencePsychopathology/fMRI_R/master/dnpl_utility.R")
 
+fsl_2_sys_env()
 #Load son1's sepcific functions here:
 prep.son1<-function(son1_single = NULL,
                     regualrvarinames=c('Participant','ColorSet','Feed1Onset','Feed2Onset','Feed3Onset','Feedback',
@@ -71,68 +69,36 @@ if (Sys.getenv("RSTUDIO_USER_IDENTITY")=="jiazhouchen") {boxdir <- "/Users/jiazh
 
 son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
 
-#Here will start the single subject loop; but for now, temporaily do SON1_002;
-"SON1_002"->tid
-son1_single<-son1_all[which(son1_all$Participant %in% tid),]
+allsub.design<-as.environment(list())
 
-#Prep the data into generally acceptable output object;
-output<-prep.son1(son1_single = son1_single)
-
-#Generate signal with make signal with grid function (grid.csv need to be in working directory or specified otherwise)
-signals<-makesignalwithgrid(outputdata = output,add_taskness = T)
-
-#Create this model using centered scaled twoLR vba output and taskness regressors
-
-model.cs.twoLR<-list(
-  #Add Taskness Regressors:
-  infusion=signals$infusion, 
-  noinfusion=signals$noinfusion,
-  feedback=signals$feedback,
-  nofeedback=signals$nofeedback,
-  #Add VBA output Regressors:
-  PEreinf=signals$twoLRPE_CS_reinf_cont,
-  PEnoreinf=signals$twoLRPE_CS_reinf_cont_r,
-  ValueInfus=signals$twoLRValueShifted_CS_plac_ctrl,
-  ValueNoInfus=signals$twoLRValueShifted_CS_plac_ctrl_r)
-
-model.cs.twoLR.alt<-list(
-  #Add Taskness Regressors:
-  Infusion=signals$infusion_evt, 
-  ifinfusion=signals$infusion,
-  Feedback=signals$feedback_evt,
-  iffeedback=signals$feedback,
-  #Add VBA output Regressors:
-  PE=signals$twoLRPE_CS,
-  Value=signals$twoLRValueShifted_CS)
-
-model.cs.twoLR.all<-list(
-  #Add Taskness Regressors:
-  yesinfusion=signals$infusion, 
-  noinfusion=signals$noinfusion,
-  yesfeedback=signals$feedback,
-  nofeedback=signals$nofeedback,
-  Infusion=signals$infusion_evt,
-  Feedback=signals$feedback_evt,
-  #Add VBA output Regressors:
-  PEreinf=signals$twoLRPE_CS_reinf_cont,
-  PEnoreinf=signals$twoLRPE_CS_reinf_cont_r,
-  ValueInfus=signals$twoLRValueShifted_CS_plac_ctrl,
-  ValueNoInfus=signals$twoLRValueShifted_CS_plac_ctrl_r)
-
-#Use Michael's package to generate design matrix and correlation graph;
-design<-dependlab::build_design_matrix(
-                                       events = output$event.list$allconcat, #Load the task info
-                                       signals = model.cs.twoLR,     #Load the Model
-                                       #write_timing_files = c("convolved", "AFNI"), #Output timing files to FSL style
-                                       tr=1.0,                      #tr=1 second, maybe need to double check, I'm kinda sure....
-                                       output_directory = getwd(), #Where to output the timing files, default is the working directory
-                                       nuisance_regressors = NULL #Maybe could add in nuisance_regressors from pre-proc
-                                       )
-
-make_heatmap_with_design(design)
-
-
-
-
+for (xid in unique(son1_all$Participant)) {
+  singlesub<-son1_all[which(son1_all$Participant %in% xid),]
+tryCatch(
+  {
+    do.all.subjs(
+    tid=xid,
+    do.prep.call="prep.son1",
+    do.prep.arg=list(son1_single=singlesub),
+    cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+    regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg/",
+    gridpath="grid.csv",
+    func.nii.name="swudktm*[0-9].nii.gz",
+    proc_id_subs="_a",    #Put "" for nothing.
+    wrt.timing=c("convolved", "FSL"),
+    model.name="PE_8C_reg_by_vol",
+    model.varinames=c("infusion",         
+                      "noinfusion",
+                      "feedback",
+                      "nofeedback",
+                      "twoLRPE_CS_reinf_cont",
+                      "twoLRPE_CS_reinf_cont_r",
+                      "twoLRValueShifted_CS_plac_ctrl",
+                      "twoLRValueShifted_CS_plac_ctrl_r"),
+    assigntoenvir=allsub.design)
+  },error=function(x) {}
+)
+}
+  
+"/Volumes/bek/neurofeedback/scripts/fsl/fsl_8C_per_run_PE.fsf"
 
 

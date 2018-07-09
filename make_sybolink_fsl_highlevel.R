@@ -4,7 +4,15 @@
 ####################################################
 
 #This function can't be run in R Studio anymore because of Mac's inheritence policy
+if (file.exists("pecina_R_utility_function.R")){
+  source("pecina_R_utility_function.R")
+} else {
+  devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/pecina_R_utility_function.R")
+}
+devtools::source_url("https://raw.githubusercontent.com/DecisionNeurosciencePsychopathology/fMRI_R/master/dnpl_utility.R")
 
+#Set up fsl enviroment just in case we are using RStudio GUI
+fsl_2_sys_env()
 ########Start Function:
 son.prepare4secondlvl<-function(ssana.path=NULL,    
                                 #Single Sub Analysis Folder, should contain ID/*.feat
@@ -88,6 +96,7 @@ son.prepare4secondlvl<-function(ssana.path=NULL,
 
 #####Actually run it:
 #####You can get all the warnings by assign the result of the function to an object, and exam the object: test<-son.prepare4secondlvl(...)
+
 son.prepare4secondlvl(
                       ssana.path="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",            
                       preproc.path="/Volumes/bek/neurofeedback/sonrisa2/proc",                                
