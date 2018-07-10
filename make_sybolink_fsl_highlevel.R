@@ -4,6 +4,8 @@
 ####################################################
 
 #This function can't be run in R Studio anymore because of Mac's inheritence policy
+#NONSENSEEEEEE YOU CAN JUST USE THE fsl_2_sys_env() command!
+
 if (file.exists("pecina_R_utility_function.R")){
   source("pecina_R_utility_function.R")
 } else {
@@ -96,6 +98,7 @@ son.prepare4secondlvl<-function(ssana.path=NULL,
 
 #####Actually run it:
 #####You can get all the warnings by assign the result of the function to an object, and exam the object: test<-son.prepare4secondlvl(...)
+if (FALSE) {
 
 son.prepare4secondlvl(
                       ssana.path="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",            
@@ -107,7 +110,7 @@ son.prepare4secondlvl(
                       overwrite<-TRUE                                                                         
                       )
 
-
+}
 
 # Below are arguments for nfb:
 

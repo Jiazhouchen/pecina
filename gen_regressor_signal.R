@@ -1,7 +1,7 @@
 ############################################
 ####### New Functions for regressor ########
 ############################################
-#Do a source script from git function
+#Do a source utility scripts from git (when we have enough we will make a function out of it...)
 #Check required packages:
 require("devtools")
 if("dependlab" %in% installed.packages()){}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
@@ -13,12 +13,16 @@ if (file.exists("pecina_R_utility_function.R")){
 }
 devtools::source_url("https://raw.githubusercontent.com/DecisionNeurosciencePsychopathology/fMRI_R/master/dnpl_utility.R")
 
-#Setting up FSL in case we are using RStudio 
+
+#Setting up FSL global enviroment variables in case we are using RStudio 
 fsl_2_sys_env()
 
 #Setting some global options (Putting moving variables here so the function down there could just grab them)
 argu<-as.environment(list(
-#Put them in a enviroment so that they can be access everywhere by get function
+#Number of processes to allow for paralle processing
+nprocess=NULL,
+#If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
+stop=NULL,
 #Where is the cfg config file:
 cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
 #Where to put/are the regressors 
@@ -95,13 +99,29 @@ prep.son1<-function(son1_single = NULL,
   finalist[["allconcat"]]<-ktz
   output<-list(event.list=finalist,output.df=son1_single,value=vba)
 }
-#Get Data
-if (Sys.getenv("RSTUDIO_USER_IDENTITY")=="jiazhouchen") {boxdir <- "/Users/jiazhouchen/Box Sync"
-} else if (Sys.getenv("RSTUDIO_USER_IDENTITY")=="jiazhou") {boxdir <- "/Volumes/bek/Box Sync"} else {
+
+
+
+
+###################
+##Official Start:##
+###################
+
+
+
+#Step 1: 
+#Get Behavioral and VBA output Data
+if (Sys.getenv("USER")=="jiazhouchen") {boxdir <- "/Users/jiazhouchen/Box Sync"
+} else if (Sys.getenv("USER")=="jiazhou") {boxdir <- "/Volumes/bek/Box Sync"} else {
 boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)}
 
 son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
 
+stepnow<-1
+if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at step ",stepnow))}}
+
+#Step 2:
+#Now we process the data and convolve them using the argument provided up there; with help of 'dependlab' package
 allsub.design<-as.environment(list())
 
 for (xid in unique(son1_all$Participant)) {
@@ -125,8 +145,11 @@ tryCatch(
 )
 }
 
+stepnow<-stepnow+1
+if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at step ",stepnow))}}
 
 
+#Step 3: 
 #Now we do the single sub processinggggggggggggg 
 
 #let's subset this 
@@ -138,10 +161,12 @@ small.sub<-eapply(allsub.design, function(x) {
 
 #This part takes a long time...Let's paralle it:
 require("parallel")
+if (is.null(nprocess)){
 if (detectCores()>12){
 num_cores<-8 #Use 8 cores to minimize burden; if on throndike 
-} else {num_cores<-detectCores()-2} #Or if you are running this on laptop; whatever cores minus 2; 
-
+#Or if you are running this on laptop; whatever cores minus 2; I guess if it's a dual core...let's just don't do that (zero core will not paralle anything)
+} else {num_cores<-detectCores()-2} 
+} else {nprocess->num_cores}
 clusterjobs<-makeCluster(num_cores)
 clusterExport(clusterjobs,c("argu","small.sub","get_volume_run","cfg_info","change_fsl_template","fsl_2_sys_env"),envir = environment())
 
@@ -154,6 +179,7 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
     xarg$outputpath<-file.path(argu$ssub_outputroot,argu$model.name,idx,paste0("run",runnum,"_output"))
     xarg$volumes<-x$run_volumes[runnum]
     xarg$funcfile<-get_volume_run(id=paste0(idx,argu$proc_id_subs),cfgfilepath = argu$cfgpath,reg.nii.name = argu$func.nii.name,returnas = "path")[runnum]
+    #Could do better on the regressor thing here; it's hard coded but it could be not hard coded.
     xarg$nuisa<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_nuisance_regressor_with_motion.txt"))
     xarg$infreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_infusion.1D"))
     xarg$noinfreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_noinfusion.1D"))
@@ -174,6 +200,15 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
 })
 
 stopCluster(clusterjobs)
+
+stepnow<-stepnow+1
+if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at step ",stepnow))}}
+
+#Step 4: 
+#Now we make the symbolic link for template matching...so they are not misaligned anymore...
+#source the script: 
+devtools::source_url("https://github.com/Jiazhouchen/pecina/blob/master/make_sybolink_fsl_highlevel.R")
+
 
 #In development:
 
