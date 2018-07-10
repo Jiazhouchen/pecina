@@ -122,9 +122,16 @@ if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at 
 
 #Step 2:
 #Now we process the data and convolve them using the argument provided up there; with help of 'dependlab' package
-allsub.design<-as.environment(list())
+if (file.exists(file.path(argu$ssub_outputroot,argu$model.name,"design.rdata"))) {
+  load(file.path(argu$ssub_outputroot,argu$model.name,"design.rdata"))
+} else {allsub.design<-as.environment(list())}
 
-for (xid in unique(son1_all$Participant)) {
+if (length(names(allsub.design))>0) {
+  idtodo<-as.character(unique(son1_all$Participant)[which(! unique(son1_all$Participant) %in% names(allsub.design))])
+} else {idtodo<-unique(son1_all$Participant)}
+
+if (length(idtodo)>0) {
+for (xid in idtodo) {
   singlesub<-son1_all[which(son1_all$Participant %in% xid),]
 tryCatch(
   {
@@ -145,7 +152,11 @@ tryCatch(
 )
 }
 
-stepnow<-stepnow+1
+save(list = "allsub.design",file = file.path(argu$ssub_outputroot,argu$model.name,"design.rdata"))
+} else {message("NO NEW DATA NEEDED TO BE PROCESSED")}
+
+
+allstepnow<-stepnow+1
 if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at step ",stepnow))}}
 
 
@@ -156,7 +167,9 @@ if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at 
 small.sub<-eapply(allsub.design, function(x) {
   list(
   ID=x$ID,
-  run_volumes=x$run_volumes)
+  run_volumes=x$run_volumes,
+  regpath=x$regpath,
+  preprocID=preprocID)
 })
 
 #This part takes a long time...Let's paralle it:
@@ -180,6 +193,7 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
     xarg$volumes<-x$run_volumes[runnum]
     xarg$funcfile<-get_volume_run(id=paste0(idx,argu$proc_id_subs),cfgfilepath = argu$cfgpath,reg.nii.name = argu$func.nii.name,returnas = "path")[runnum]
     #Could do better on the regressor thing here; it's hard coded but it could be not hard coded.
+    #Also could've just use the regpath in small.sub
     xarg$nuisa<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_nuisance_regressor_with_motion.txt"))
     xarg$infreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_infusion.1D"))
     xarg$noinfreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_noinfusion.1D"))
@@ -208,6 +222,16 @@ if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at 
 #Now we make the symbolic link for template matching...so they are not misaligned anymore...
 #source the script: 
 devtools::source_url("https://github.com/Jiazhouchen/pecina/blob/master/make_sybolink_fsl_highlevel.R")
+
+son.prepare4secondlvl(
+  ssana.path="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",            
+  preproc.path="/Volumes/bek/neurofeedback/sonrisa2/proc",                                
+  standardbarin.path="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii", 
+  dir.filter="SC_FirstLevels_oldTemplate",                                                
+  proc.name="cf",                                                                         
+  taskname<-"cf_proc",                                                                   
+  overwrite<-TRUE                                                                         
+)
 
 
 #In development:
