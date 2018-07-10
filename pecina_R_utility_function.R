@@ -17,8 +17,10 @@ glvl_all_cope<-function(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanaly
                        copestorun=1:8
 ) {
   if ( is.null(modelname) ) {stop("Must specify a model name other wise it will be hard to find all copes")}
-  
-  
+
+#Ensure fsl are in path:
+fsl_2_sys_env()
+
 raw<-system(paste0("find ",file.path(rootdir,modelname,"*/average.gfeat")," -iname '*.feat' -maxdepth 2 -mindepth 1 -type d"),intern = T)
 strsplit(raw,split = "/") ->raw.split
 df.ex<-data.frame(ID=unlist(lapply(raw.split,function(x) {
@@ -37,7 +39,7 @@ noID<-aggregate(COPENUM~ID,data = df.ex,max)$ID[noIDpos]
 print(paste("This ID:",noID,"does not have enough COPES, will be removed from running...."))
 df.ex[which(!df.ex$ID %in% noID),]->df.ex
 } else {print("All Good!")}
-print("Now will run fslmerge and randomise, function will fail if FSLENVIR is not set up.")
+print("Now will run fslmerge and randomise, function will fail if FSL ENVIR is not set up. (Should not happen since it's guarded by func)")
 
 cope.fslmerge<-lapply(copestorun,function(x) {
   outputroot<-file.path(outputdir,modelname,paste0("cope",x,"randomize_onesample_ttest"))

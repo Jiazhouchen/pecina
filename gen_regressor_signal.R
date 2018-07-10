@@ -2,16 +2,51 @@
 ####### New Functions for regressor ########
 ############################################
 #Do a source script from git function
+#Check required packages:
+require("devtools")
+if("dependlab" %in% installed.packages()){}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
+#Load utility functions from both sources
 if (file.exists("pecina_R_utility_function.R")){
   source("pecina_R_utility_function.R")
 } else {
   devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/pecina_R_utility_function.R")
 }
+devtools::source_url("https://raw.githubusercontent.com/DecisionNeurosciencePsychopathology/fMRI_R/master/dnpl_utility.R")
 
-#Source the fMRI helper functions
-source_script_github("https://raw.githubusercontent.com/DecisionNeurosciencePsychopathology/fMRI_R/master/dnpl_utility.R")
-
+#Setting up FSL in case we are using RStudio 
 fsl_2_sys_env()
+
+#Setting some global options (Putting moving variables here so the function down there could just grab them)
+argu<-as.environment(list(
+#Put them in a enviroment so that they can be access everywhere by get function
+#Where is the cfg config file:
+cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+#Where to put/are the regressors 
+regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",
+#Where is the grid to make signal?
+gridpath="grid.csv",
+#What pre-proc data to grab:
+func.nii.name="swudktm*[0-9].nii.gz",
+#Does the ID have a tails:
+proc_id_subs="_a",
+#Now set up the model:
+model.name="PE_8C_reg_by_vol",
+#Look at the grid! 
+model.varinames=c("infusion",         
+                  "noinfusion",
+                  "feedback",
+                  "nofeedback",
+                  "twoLRPE_CS_reinf_cont",
+                  "twoLRPE_CS_reinf_cont_r",
+                  "twoLRValueShifted_CS_plac_ctrl",
+                  "twoLRValueShifted_CS_plac_ctrl_r"),
+ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_8C_by_run_usedby_R.fsf",
+ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl"
+
+#Add more universal arguements in here: 
+))
+
+
 #Load son1's sepcific functions here:
 prep.son1<-function(son1_single = NULL,
                     regualrvarinames=c('Participant','ColorSet','Feed1Onset','Feed2Onset','Feed3Onset','Feedback',
@@ -60,12 +95,10 @@ prep.son1<-function(son1_single = NULL,
   finalist[["allconcat"]]<-ktz
   output<-list(event.list=finalist,output.df=son1_single,value=vba)
 }
-
-
-
 #Get Data
 if (Sys.getenv("RSTUDIO_USER_IDENTITY")=="jiazhouchen") {boxdir <- "/Users/jiazhouchen/Box Sync"
-} else {boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)}
+} else if (Sys.getenv("RSTUDIO_USER_IDENTITY")=="jiazhou") {boxdir <- "/Volumes/bek/Box Sync"} else {
+boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)}
 
 son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
 
@@ -79,26 +112,84 @@ tryCatch(
     tid=xid,
     do.prep.call="prep.son1",
     do.prep.arg=list(son1_single=singlesub),
-    cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
-    regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg/",
-    gridpath="grid.csv",
-    func.nii.name="swudktm*[0-9].nii.gz",
-    proc_id_subs="_a",    #Put "" for nothing.
+    cfgpath=argu$cfgpath,
+    regpath=argu$regpath,
+    gridpath=argu$gridpath,
+    func.nii.name=argu$func.nii.name,
+    proc_id_subs=argu$proc_id_subs,    #Put "" for nothing.
     wrt.timing=c("convolved", "FSL"),
-    model.name="PE_8C_reg_by_vol",
-    model.varinames=c("infusion",         
-                      "noinfusion",
-                      "feedback",
-                      "nofeedback",
-                      "twoLRPE_CS_reinf_cont",
-                      "twoLRPE_CS_reinf_cont_r",
-                      "twoLRValueShifted_CS_plac_ctrl",
-                      "twoLRValueShifted_CS_plac_ctrl_r"),
+    model.name=argu$model.name,
+    model.varinames=argu$model.varinames,
     assigntoenvir=allsub.design)
-  },error=function(x) {}
+  },error=function(x) {paste0(xid,": This person failed regressor generation...go investigate")}
 )
 }
+
+
+
+#Now we do the single sub processinggggggggggggg 
+
+#let's subset this 
+small.sub<-eapply(allsub.design, function(x) {
+  list(
+  ID=x$ID,
+  run_volumes=x$run_volumes)
+})
+
+#This part takes a long time...Let's paralle it:
+require("parallel")
+if (detectCores()>12){
+num_cores<-8 #Use 8 cores to minimize burden; if on throndike 
+} else {num_cores<-detectCores()-2} #Or if you are running this on laptop; whatever cores minus 2; 
+
+clusterjobs<-makeCluster(num_cores)
+clusterExport(clusterjobs,c("argu","small.sub","get_volume_run","cfg_info","change_fsl_template","fsl_2_sys_env"),envir = environment())
+
+NU<-parSapply(clusterjobs,small.sub,function(x) {
+  fsl_2_sys_env()
+  idx<-x$ID
+  for (runnum in 1:length(x$run_volumes)) {
+    xarg<-as.environment(list())
+    xarg$runnum<-runnum    
+    xarg$outputpath<-file.path(argu$ssub_outputroot,argu$model.name,idx,paste0("run",runnum,"_output"))
+    xarg$volumes<-x$run_volumes[runnum]
+    xarg$funcfile<-get_volume_run(id=paste0(idx,argu$proc_id_subs),cfgfilepath = argu$cfgpath,reg.nii.name = argu$func.nii.name,returnas = "path")[runnum]
+    xarg$nuisa<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_nuisance_regressor_with_motion.txt"))
+    xarg$infreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_infusion.1D"))
+    xarg$noinfreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_noinfusion.1D"))
+    xarg$fbreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_feedback.1D"))
+    xarg$nofbreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_nofeedback.1D"))
+    xarg$inf_value<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRValueShifted_CS_plac_ctrl.1D"))
+    xarg$noinf_value<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRValueShifted_CS_plac_ctrl_r.1D"))
+    xarg$fb_PE<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRPE_CS_reinf_cont.1D"))
+    xarg$nofb_PE<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRPE_CS_reinf_cont_r.1D"))
+    
+    fsltemplate<-readLines(argu$ssub_fsl_templatepath)
+    subbyrunfeat<-change_fsl_template(fsltemplate = readLines(argu$ssub_fsl_templatepath),begin = "ARG_",end="_END",searchenvir = xarg)
+    fsfpath<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_",argu$model.name,".fsf"))
+    writeLines(subbyrunfeat,fsfpath)
+    system(paste0("feat ",fsfpath),intern = T)
+  }
   
-"/Volumes/bek/neurofeedback/scripts/fsl/fsl_8C_per_run_PE.fsf"
+})
+
+stopCluster(clusterjobs)
+
+#In development:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
