@@ -9,6 +9,56 @@ source_script_github <- function(gitscripturl) {
   eval(parse(text = script), envir= .GlobalEnv)
 }
 
+###SON1 single sub Behavr Proc function:
+prep.son1<-function(son1_single = NULL,
+                    regualrvarinames=c('Participant','ColorSet','Feed1Onset','Feed2Onset','Feed3Onset','Feedback',
+                                       'ImprovedOnset','ImprovedRespBin','ImprovedRespNum','ImprovedRespText','ImprovedRt',
+                                       'InfOnset','Infusion','InfusionNum','J1Onset','J1Seconds','J2Onset','J2Seconds',
+                                       'Jitter1','Jitter2','Run','TrialColor','TrialNum','Version','Waveform',
+                                       'WillImpOnset','WillImpRespBin','WillImpRespNum','WillImpRespText',
+                                       'WillImpRt','administration','subject_id','plac_ctrl','reinf_cont','plac','plac_ctrl_r','reinf_cont_r'),
+                    adminfilter=1) {
+  if (is.null(son1_all)) {stop("NO INPUT")}
+  son1_single<-son1_single[which(son1_single$administration==adminfilter),]
+  son1_single$plac_ctrl[son1_single$InfusionNum==1 | son1_single$InfusionNum==2] <- TRUE
+  son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
+  son1_single$plac_ctrl_r<-!son1_single$plac_ctrl
+  
+  son1_single$reinf_cont <- NA
+  son1_single$reinf_cont[son1_single$InfusionNum==1 | son1_single$InfusionNum==3] <- TRUE
+  son1_single$reinf_cont[son1_single$InfusionNum==2 | son1_single$InfusionNum==4] <- FALSE
+  son1_single$reinf_cont_r<-!son1_single$reinf_cont
+  
+  son1_single$InfDur<-son1_single$WillImpOnset - son1_single$InfOnset
+  son1_single$FeedDur<-son1_single$ImprovedOnset - son1_single$Feed2Onset
+  
+  vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
+  vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
+  #Add taskness variables to value
+  vba$plac_ctrl<-son1_single$plac_ctrl
+  vba$plac_ctrl_r<-son1_single$plac_ctrl_r
+  vba$reinf_cont<-son1_single$reinf_cont
+  vba$reinf_cont_r<-son1_single$reinf_cont_r
+  
+  finalist<-list(infusion=data.frame(event="infusion",
+                                     onset=son1_single$InfOnset,
+                                     duration=son1_single$WillImpOnset - son1_single$InfOnset,
+                                     run=son1_single$Run,
+                                     trial=son1_single$TrialNum),
+                 feedback=data.frame(event="feedback",
+                                     onset=son1_single$Feed2Onset,
+                                     duration=son1_single$ImprovedOnset - son1_single$Feed2Onset,
+                                     run=son1_single$Run,
+                                     trial=son1_single$TrialNum))
+  for (i in 1:length(finalist)) {
+    if (i==1) {ktz<-finalist[[i]]} else {
+      ktz<-rbind(ktz,finalist[[i]])}
+  }
+  finalist[["allconcat"]]<-ktz
+  output<-list(event.list=finalist,output.df=son1_single,value=vba)
+}
+
+
 ### FSL Group Level Analysis: 
 
 glvl_all_cope<-function(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",

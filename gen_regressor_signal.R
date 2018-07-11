@@ -20,7 +20,7 @@ fsl_2_sys_env()
 #Setting some global options (Putting moving variables here so the function down there could just grab them)
 argu<-as.environment(list(
 #Number of processes to allow for paralle processing
-nprocess=NULL,
+nprocess=16,
 #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
 stop=NULL,
 #Where is the cfg config file:
@@ -49,59 +49,6 @@ ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl"
 
 #Add more universal arguements in here: 
 ))
-
-
-#Load son1's sepcific functions here:
-prep.son1<-function(son1_single = NULL,
-                    regualrvarinames=c('Participant','ColorSet','Feed1Onset','Feed2Onset','Feed3Onset','Feedback',
-                                       'ImprovedOnset','ImprovedRespBin','ImprovedRespNum','ImprovedRespText','ImprovedRt',
-                                       'InfOnset','Infusion','InfusionNum','J1Onset','J1Seconds','J2Onset','J2Seconds',
-                                       'Jitter1','Jitter2','Run','TrialColor','TrialNum','Version','Waveform',
-                                       'WillImpOnset','WillImpRespBin','WillImpRespNum','WillImpRespText',
-                                       'WillImpRt','administration','subject_id','plac_ctrl','reinf_cont','plac','plac_ctrl_r','reinf_cont_r'),
-                    adminfilter=1) {
-  if (is.null(son1_all)) {stop("NO INPUT")}
-  son1_single<-son1_single[which(son1_single$administration==adminfilter),]
-  son1_single$plac_ctrl[son1_single$InfusionNum==1 | son1_single$InfusionNum==2] <- TRUE
-  son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
-  son1_single$plac_ctrl_r<-!son1_single$plac_ctrl
-  
-  son1_single$reinf_cont <- NA
-  son1_single$reinf_cont[son1_single$InfusionNum==1 | son1_single$InfusionNum==3] <- TRUE
-  son1_single$reinf_cont[son1_single$InfusionNum==2 | son1_single$InfusionNum==4] <- FALSE
-  son1_single$reinf_cont_r<-!son1_single$reinf_cont
-  
-  son1_single$InfDur<-son1_single$WillImpOnset - son1_single$InfOnset
-  son1_single$FeedDur<-son1_single$ImprovedOnset - son1_single$Feed2Onset
-  
-  vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
-  vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
-  #Add taskness variables to value
-  vba$plac_ctrl<-son1_single$plac_ctrl
-  vba$plac_ctrl_r<-son1_single$plac_ctrl_r
-  vba$reinf_cont<-son1_single$reinf_cont
-  vba$reinf_cont_r<-son1_single$reinf_cont_r
-  
-  finalist<-list(infusion=data.frame(event="infusion",
-                                     onset=son1_single$InfOnset,
-                                     duration=son1_single$WillImpOnset - son1_single$InfOnset,
-                                     run=son1_single$Run,
-                                     trial=son1_single$TrialNum),
-                 feedback=data.frame(event="feedback",
-                                     onset=son1_single$Feed2Onset,
-                                     duration=son1_single$ImprovedOnset - son1_single$Feed2Onset,
-                                     run=son1_single$Run,
-                                     trial=son1_single$TrialNum))
-  for (i in 1:length(finalist)) {
-    if (i==1) {ktz<-finalist[[i]]} else {
-      ktz<-rbind(ktz,finalist[[i]])}
-  }
-  finalist[["allconcat"]]<-ktz
-  output<-list(event.list=finalist,output.df=son1_single,value=vba)
-}
-
-
-
 
 ###################
 ##Official Start:##
@@ -174,12 +121,12 @@ small.sub<-eapply(allsub.design, function(x) {
 
 #This part takes a long time...Let's paralle it:
 require("parallel")
-if (is.null(nprocess)){
+if (is.null(argu$nprocess)){
 if (detectCores()>12){
 num_cores<-8 #Use 8 cores to minimize burden; if on throndike 
 #Or if you are running this on laptop; whatever cores minus 2; I guess if it's a dual core...let's just don't do that (zero core will not paralle anything)
 } else {num_cores<-detectCores()-2} 
-} else {nprocess->num_cores}
+} else {argu$nprocess->num_cores}
 clusterjobs<-makeCluster(num_cores)
 clusterExport(clusterjobs,c("argu","small.sub","get_volume_run","cfg_info","change_fsl_template","fsl_2_sys_env"),envir = environment())
 
@@ -225,21 +172,21 @@ if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at 
 #source the script: 
 devtools::source_url("https://github.com/Jiazhouchen/pecina/blob/master/make_sybolink_fsl_highlevel.R")
 
-son.prepare4secondlvl(
-  ssana.path="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",            
-  preproc.path="/Volumes/bek/neurofeedback/sonrisa2/proc",                                
-  standardbarin.path="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii", 
-  dir.filter="SC_FirstLevels_oldTemplate",                                                
-  proc.name="cf",                                                                         
-  taskname<-"cf_proc",                                                                   
-  overwrite<-TRUE                                                                         
-)
 
 
 #In development:
 
-
-
+if (FALSE) {
+  son.prepare4secondlvl(
+    ssana.path="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",            
+    preproc.path="/Volumes/bek/neurofeedback/sonrisa2/proc",                                
+    standardbarin.path="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii", 
+    dir.filter="SC_FirstLevels_oldTemplate",                                                
+    proc.name="cf",                                                                         
+    taskname<-"cf_proc",                                                                   
+    overwrite<-TRUE                                                                         
+  )
+}
 
 
 
