@@ -4,7 +4,7 @@
 #Do a source utility scripts from git (when we have enough we will make a function out of it...)
 #Check required packages:
 require("devtools")
-if("dependlab" %in% installed.packages()){}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
+if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 #Load utility functions from both sources
 if (file.exists("pecina_R_utility_function.R")){
   source("pecina_R_utility_function.R")
@@ -169,7 +169,7 @@ small.sub<-eapply(allsub.design, function(x) {
   ID=x$ID,
   run_volumes=x$run_volumes,
   regpath=x$regpath,
-  preprocID=preprocID)
+  preprocID=x$preprocID)
 })
 
 #This part takes a long time...Let's paralle it:
@@ -190,6 +190,7 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
     xarg<-as.environment(list())
     xarg$runnum<-runnum    
     xarg$outputpath<-file.path(argu$ssub_outputroot,argu$model.name,idx,paste0("run",runnum,"_output"))
+    if (!file.exists(paste0(xarg$outputpath,".feat")) ) {
     xarg$volumes<-x$run_volumes[runnum]
     xarg$funcfile<-get_volume_run(id=paste0(idx,argu$proc_id_subs),cfgfilepath = argu$cfgpath,reg.nii.name = argu$func.nii.name,returnas = "path")[runnum]
     #Could do better on the regressor thing here; it's hard coded but it could be not hard coded.
@@ -209,6 +210,7 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
     fsfpath<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_",argu$model.name,".fsf"))
     writeLines(subbyrunfeat,fsfpath)
     system(paste0("feat ",fsfpath),intern = T)
+    } else {message(paste("ID:",idx,"RUN:",runnum,",already exists,","to re-run, remove the directory."))}
   }
   
 })
