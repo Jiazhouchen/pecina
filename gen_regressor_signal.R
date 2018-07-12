@@ -45,7 +45,9 @@ model.varinames=c("infusion",
                   "twoLRValueShifted_CS_plac_ctrl",
                   "twoLRValueShifted_CS_plac_ctrl_r"),
 ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_8C_by_run_usedby_R.fsf",
-ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl"
+ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+hig_lvl_path_filter=NULL  #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
 
 #Add more universal arguements in here: 
 ))
@@ -170,22 +172,22 @@ if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at 
 #Step 4: 
 #Now we make the symbolic link for template matching...so they are not misaligned anymore...
 #source the script: 
-devtools::source_url("https://github.com/Jiazhouchen/pecina/blob/master/make_sybolink_fsl_highlevel.R")
-
-
+devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/prep_for_second_lvl.R")
+cfg<-cfg_info(cfgpath = argu$cfgpath)
+son.prepare4secondlvl(
+  ssana.path=file.path(argu$ssub_outputroot,argu$model.name),            
+  preproc.path=cfg$loc_mrproc_root,                                
+  standardbarin.path=argu$templatedir, 
+  dir.filter=argu$hig_lvl_path_filter,                                                
+  proc.name=cfg$paradigm_name,                                                                         
+  taskname<-cfg$preprocessed_dirname,                                                                   
+  overwrite<-TRUE)           
 
 #In development:
 
 if (FALSE) {
-  son.prepare4secondlvl(
-    ssana.path="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",            
-    preproc.path="/Volumes/bek/neurofeedback/sonrisa2/proc",                                
-    standardbarin.path="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii", 
-    dir.filter="SC_FirstLevels_oldTemplate",                                                
-    proc.name="cf",                                                                         
-    taskname<-"cf_proc",                                                                   
-    overwrite<-TRUE                                                                         
-  )
+                                                                
+  
 }
 
 
