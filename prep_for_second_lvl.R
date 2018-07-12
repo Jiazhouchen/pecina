@@ -28,13 +28,15 @@ son.prepare4secondlvl<-function(ssana.path=NULL,
                                 #See preproc path comment, this should be the dir that contains multiple runs
                                 dir.filter=NULL,
                                 #Filter out some of the unwanted folders in ssana.path, important especailly for those contain .feat structure
-                                overwrite=TRUE
+                                overwrite=TRUE,
                                 #Logical Statement, if to overwirte existing link
+                                outputmap=FALSE
+                                #Logical Statement, if true to return linkmap
                                 ) {
   if (is.null(ssana.path) | is.null(preproc.path) | is.null(standardbarin.path) | is.null(proc.name) | is.null(taskname)){stop("not enough info to run")}
 #Step 1: Step up parameters, but it's a function so do it outside please
   #Step 2: Go to find all the feat. directory:
-  featlist<-system(paste0("find ",ssana.path," -iname '*.feat' -maxdepth 4 -mindepth 1 -type d"),intern = T)
+  featlist<-system(paste0("find ",ssana.path," -iname '*output.feat' -maxdepth 4 -mindepth 1 -type d"),intern = T)
   #Break them down&take out all old_template_results
   strsplit(featlist,split = "/")->s.featlist
   s.featlist.p<-lapply(s.featlist,function(x) {
@@ -62,35 +64,30 @@ son.prepare4secondlvl<-function(ssana.path=NULL,
     if (overwrite) {
       st1<-suppressWarnings(system(paste0("rm -r ", linkmap$destination[i]),intern = T))
       st1_5<-suppressWarnings(system(paste0("rm -r ", linkmap$destination_standard[i]),intern = T))
+      st1_9<-suppressWarnings(system(paste0("rm -r ", linkmap$originplace[i]),intern = T))
     }
-      st2<-system(paste0("mkdir -m 775 ", linkmap$destination[i]),intern = T)
+      st2<-dir.create(showWarnings = F,path = linkmap$destination[i])
     if (!file.exists(linkmap$originplace[i]))  {
-      system("source ~/.bash_profile")
+      fsl_2_sys_env()
       system(paste0("${FSLDIR}/bin/flirt -in ",file.path(ssana.path,linkmap$id[i],linkmap$runword[i],"mask.nii.gz")," -ref ",
                     standardbarin.path," -out /Volumes/bek/neurofeedback/.temp.nii -omat ",linkmap$originplace[i],
                     " -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -dof 12  -interp trilinear"))
-      print(paste0("${FSLDIR}/bin/flirt -in ",file.path(ssana.path,linkmap$id[i],linkmap$runword[i],"mask.nii.gz")," -ref ",
-                   standardbarin.path," -out /Volumes/bek/neurofeedback/.temp.nii -omat ",linkmap$originplace[i],
-                   " -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -dof 12  -interp trilinear"))
     }
-    if (length(st2)==0) {
+    
       #Make actual links now....
       #invisible(
       tryCatch(
-      system(paste0("ln -sv ",file.path(linkmap$originplace)[i]," ",
-             file.path(linkmap$destination,"example_func2standard.mat")[i]),intern = T),
-      system(paste0("ln -sv ",file.path(linkmap$originplace)[i]," ",
-                    file.path(linkmap$destination,"standard2example_func.mat")[i])),
-      system(paste0("ln -sv ",standardbarin.path," ",
-                    file.path(linkmap$destination,"standard.nii.gz")[i])), error = function(x) {
+      file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"example_func2standard.mat")[i]),
+      file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"standard2example_func.mat")[i]),
+      file.symlink(from = standardbarin.path,to = file.path(linkmap$destination,"standard.nii.gz")[i]),
+      
+      error = function(x) {
                       print("something went wrong")
                     }
       )
       #)
-      
-    } else if (!attr(st2,"status")==1) {print("already exists, skip")}
   }
-  return(linkmap)
+  if(outputmap) {return(linkmap)}
   print("DONE")
 }
 
