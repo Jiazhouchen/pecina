@@ -79,7 +79,7 @@ son.prepare4secondlvl<-function(ssana.path=NULL,
       if (!file.exists(file.path(linkmap$destination,"example_func2standard.mat")[i])){
       file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"example_func2standard.mat")[i])
       file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"standard2example_func.mat")[i])
-      file.symlink(from = standardbarin.path,to = file.path(linkmap$destination,"standard.nii.gz")[i],showWarnings=F)
+      file.symlink(from = standardbarin.path,to = file.path(linkmap$destination,"standard.nii.gz")[i])
       } else {message("meh,already there, if you want to overwirite, do overwrite...")}
      
       #)
