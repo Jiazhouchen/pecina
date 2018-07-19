@@ -1,8 +1,8 @@
-﻿ename,norm,normargu,valuefrom,modifier,name,style,comment
-infusion,none,NA,plac_ctrl,NA,infusion,subset,taskness
-infusion,none,NA,plac_ctrl_r,NA,noinfusion,subset,taskness
-feedback,none,NA,reinf_cont,NA,feedback,subset,taskness
-feedback,none,NA,reinf_cont_r,NA,nofeedback,subset,taskness
+ename,norm,normargu,valuefrom,modifier,name,style,comment
+infusion,none,NA,plac_ctrl,NA,inf,subset,taskness
+infusion,none,NA,plac_ctrl_r,NA,noinf,subset,taskness
+feedback,none,NA,reinf_cont,NA,fb,subset,taskness
+feedback,none,NA,reinf_cont_r,NA,nofb,subset,taskness
 feedback,none,NA,momentum_oneK_PE,NA,momentumPE,subset,vba
 infusion,none,NA,momentum_oneK_vt1shifted,NA,momentumValueShifted,subset,vba
 feedback,none,NA,momentum_oneK_PE_centerscaled,NA,momentumPE_CS,subset,vba
@@ -17,13 +17,13 @@ feedback,none,NA,momentum_oneK_PE_centerscaled,reinf_cont,momentumPE_CS_reinf_co
 infusion,none,NA,momentum_oneK_vt1shifted_centerscaled,plac_ctrl,momentumValueShifted_CS_plac_ctrl,subset,vba x taskness
 feedback,none,NA,twoLR_S_fixD_oneK_PE,reinf_cont,twoLRPE_reinf_cont,subset,vba x taskness
 infusion,none,NA,twoLR_S_fixD_oneK_vt1shifted,plac_ctrl,twoLRValueShifted_plac_ctrl,subset,vba x taskness
-feedback,none,NA,twoLR_S_fixD_oneK_PE_centerscaled,reinf_cont,twoLRPE_CS_reinf_cont,subset,vba x taskness
-infusion,none,NA,twoLR_S_fixD_oneK_vt1shifted_centerscaled,plac_ctrl,twoLRValueShifted_CS_plac_ctrl,subset,vba x taskness
+feedback,none,NA,twoLR_S_fixD_oneK_PE_centerscaled,reinf_cont,fb_PE,subset,vba x taskness
+infusion,none,NA,twoLR_S_fixD_oneK_vt1shifted_centerscaled,plac_ctrl,inf_value,subset,vba x taskness
 feedback,none,NA,momentum_oneK_PE,reinf_cont_r,momentumPE_reinf_cont_r,subset,vba x taskness
 infusion,none,NA,momentum_oneK_vt1shifted,plac_ctrl_r,momentumValueShifted_plac_ctrl_r,subset,vba x taskness
 feedback,none,NA,momentum_oneK_PE_centerscaled,reinf_cont_r,momentumPE_CS_reinf_cont_r,subset,vba x taskness
 infusion,none,NA,momentum_oneK_vt1shifted_centerscaled,plac_ctrl_r,momentumValueShifted_CS_plac_ctrl_r,subset,vba x taskness
 feedback,none,NA,twoLR_S_fixD_oneK_PE,reinf_cont_r,twoLRPE_reinf_cont_r,subset,vba x taskness
 infusion,none,NA,twoLR_S_fixD_oneK_vt1shifted,plac_ctrl_r,twoLRValueShifted_plac_ctrl_r,subset,vba x taskness
-feedback,none,NA,twoLR_S_fixD_oneK_PE_centerscaled,reinf_cont_r,twoLRPE_CS_reinf_cont_r,subset,vba x taskness
-infusion,none,NA,twoLR_S_fixD_oneK_vt1shifted_centerscaled,plac_ctrl_r,twoLRValueShifted_CS_plac_ctrl_r,subset,vba x taskness
+feedback,none,NA,twoLR_S_fixD_oneK_PE_centerscaled,reinf_cont_r,nofb_PE,subset,vba x taskness
+infusion,none,NA,twoLR_S_fixD_oneK_vt1shifted_centerscaled,plac_ctrl_r,noinf_value,subset,vba x taskness
