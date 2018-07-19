@@ -48,7 +48,7 @@ if (argu_sc) {
     #Number of processes to allow for paralle processing
     nprocess=NULL,
     #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
-    onlyrun=2,
+    onlyrun=NULL,
     #Where is the cfg config file:
     cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
     #Where to put/are the regressors 
