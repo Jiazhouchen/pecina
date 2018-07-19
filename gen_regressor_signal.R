@@ -44,10 +44,18 @@ model.varinames=c("infusion",
                   "twoLRPE_CS_reinf_cont_r",
                   "twoLRValueShifted_CS_plac_ctrl",
                   "twoLRValueShifted_CS_plac_ctrl_r"),
+#Single subject FSL template path
 ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_8C_by_run_usedby_R.fsf",
+#Group level FSL template path
+gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_8Cbyrun_average_R.fsf",
+#Single Subject output root path (before model name folder)
 ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+#Brain template path
 templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
-hig_lvl_path_filter=NULL  #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
+#Group level analysis output path
+glvl_output="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+#If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
+hig_lvl_path_filter=NULL 
 
 #Add more universal arguements in here: 
 ))
@@ -129,7 +137,7 @@ num_cores<-8 #Use 8 cores to minimize burden; if on throndike
 #Or if you are running this on laptop; whatever cores minus 2; I guess if it's a dual core...let's just don't do that (zero core will not paralle anything)
 } else {num_cores<-detectCores()-2} 
 } else {argu$nprocess->num_cores}
-clusterjobs<-makeCluster(num_cores)
+clusterjobs<-makeCluster(num_cores,outfile="")
 clusterExport(clusterjobs,c("argu","small.sub","get_volume_run","cfg_info","change_fsl_template","fsl_2_sys_env"),envir = environment())
 
 NU<-parSapply(clusterjobs,small.sub,function(x) {
@@ -154,11 +162,18 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
     xarg$fb_PE<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRPE_CS_reinf_cont.1D"))
     xarg$nofb_PE<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRPE_CS_reinf_cont_r.1D"))
     
-    fsltemplate<-readLines(argu$ssub_fsl_templatepath)
-    subbyrunfeat<-change_fsl_template(fsltemplate = readLines(argu$ssub_fsl_templatepath),begin = "ARG_",end="_END",searchenvir = xarg)
-    fsfpath<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_",argu$model.name,".fsf"))
-    writeLines(subbyrunfeat,fsfpath)
-    system(paste0("feat ",fsfpath),intern = T)
+    feat_w_template(templatepath = argu$ssub_fsl_templatepath,
+                    beg = "ARG_",
+                    end = "_END",
+                    fsf.path = file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_",argu$model.name,".fsf")),
+                    envir = xarg)
+    
+    
+    #fsltemplate<-readLines(argu$ssub_fsl_templatepath)
+    #subbyrunfeat<-change_fsl_template(fsltemplate = readLines(argu$ssub_fsl_templatepath),begin = "ARG_",end="_END",searchenvir = xarg)
+    #fsfpath<-
+    #writeLines(subbyrunfeat,fsfpath)
+    #system(paste0("feat ",fsfpath),intern = T)
     } else {message(paste("ID:",idx,"RUN:",runnum,",already exists,","to re-run, remove the directory."))}
   }
   
@@ -166,31 +181,82 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
 
 stopCluster(clusterjobs)
 
+
+
 stepnow<-stepnow+1
 if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at step ",stepnow))}}
 
 #Step 4: 
 #Now we make the symbolic link for template matching...so they are not misaligned anymore...
 #source the script: 
+#This one runs fast enough that it should be fine to not parallel it
 devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/prep_for_second_lvl.R")
 cfg<-cfg_info(cfgpath = argu$cfgpath)
-son.prepare4secondlvl(
+prepmap<-son.prepare4secondlvl(
   ssana.path=file.path(argu$ssub_outputroot,argu$model.name),            
   preproc.path=cfg$loc_mrproc_root,                                
   standardbarin.path=argu$templatedir, 
   dir.filter=argu$hig_lvl_path_filter,                                                
   proc.name=cfg$paradigm_name,                                                                         
-  taskname<-cfg$preprocessed_dirname,                                                                   
-  overwrite<-TRUE)           
+  taskname=cfg$preprocessed_dirname,                                                                   
+  overwrite=FALSE,
+  outputmap=TRUE)           
+
+
+
+#Should set up another paralle here:
+#outputpath average
+#feat# 
+
+cfg$n_expected_funcruns->runnum
+featlist<-lapply(small.sub,function(x) {
+  x$ID->idz
+  emp<-list()
+  for (runnum in 1:runnum) {
+    emp[[paste0("feat",runnum)]]<-file.path(argu$ssub_outputroot,argu$model.name,idz,paste0("run",runnum,"_output.feat"))
+  }
+  small.sub[[idz]]$featlist<-emp
+  assign("small.sub",small.sub,envir = globalenv())
+  return(emp)
+  })
+
+
+clusterjobs1<-makeCluster(num_cores,outfile="")
+clusterExport(clusterjobs1,c("argu","small.sub","get_volume_run","cfg_info","change_fsl_template","fsl_2_sys_env","feat_w_template"),envir = environment())
+
+NU<-parSapply(clusterjobs1,small.sub, function(y) {
+
+  larg<-as.environment(list())
+  y$ID->larg$idx
+  larg$outputpath<-file.path(argu$ssub_outputroot,argu$model.name,larg$idx,"average")
+  larg<-list2env(y$featlist,envir = larg)
+  if (!file.exists(file.path(larg$outputpath,".gfeat"))) {
+    feat_w_template(templatepath = argu$gsub_fsl_templatepath,
+                    beg = "ARG_",
+                    end = "_END",
+                    fsf.path = file.path(argu$regpath,argu$model.name,larg$idx,paste0("gfeat_temp",".fsf")),
+                    envir = larg)
+  } else {message("This person already got average done!")}
+  
+})
+stopCluster(clusterjobs1)
+
+
+#Start Group Level Analysis:
+glvl_all_cope(rootdir=argu$ssub_outputroot,
+                        outputdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+                        modelname=argu$model.name,
+                        copestorun=1:16,
+                        paralleln = num_cores
+)
+
+
 
 #In development:
-
 if (FALSE) {
                                                                 
   
 }
-
-
 
 
 

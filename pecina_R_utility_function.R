@@ -59,12 +59,16 @@ prep.son1<-function(son1_single = NULL,
 }
 
 
+
+
+
 ### FSL Group Level Analysis: 
 
 glvl_all_cope<-function(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
                        outputdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
                        modelname="PE_8C_old",
-                       copestorun=1:8
+                       copestorun=1:8,
+                       paralleln=NULL
 ) {
   if ( is.null(modelname) ) {stop("Must specify a model name other wise it will be hard to find all copes")}
 
@@ -102,11 +106,18 @@ cope.fslmerge<-lapply(copestorun,function(x) {
          )
   })
 sink(file="log.txt",split=TRUE)
-lapply(cope.fslmerge,function(x) {
+if (!is.null(paralleln)){
+  cj1<-makeCluster(paralleln,outfile="")
+  NU<-parSapply(cj1,cope.fslmerge,function(x) {
+    print(paste0("Now running ",cope.fslmerge))
+    system(command = x,intern = T,ignore.stdout = F,ignore.stderr = F)
+  })
+  stopCluster(cj1)
+} else {lapply(cope.fslmerge,function(x) {
   print(paste0("Now running ",cope.fslmerge))
   system(command = x,intern = T,ignore.stdout = F,ignore.stderr = F)
 })
-
+}
 print("DONE")
 }
 

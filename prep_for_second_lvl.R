@@ -63,7 +63,7 @@ son.prepare4secondlvl<-function(ssana.path=NULL,
   for (i in 1:length(linkmap$id)) {
     if (overwrite) {
       st1<-suppressWarnings(system(paste0("rm -r ", linkmap$destination[i]),intern = T))
-      st1_5<-suppressWarnings(system(paste0("rm -r ", linkmap$destination_standard[i]),intern = T))
+      #st1_5<-suppressWarnings(system(paste0("rm -r ", linkmap$destination_standard[i]),intern = T))
       st1_9<-suppressWarnings(system(paste0("rm -r ", linkmap$originplace[i]),intern = T))
     }
       st2<-dir.create(showWarnings = F,path = linkmap$destination[i])
@@ -76,15 +76,12 @@ son.prepare4secondlvl<-function(ssana.path=NULL,
     
       #Make actual links now....
       #invisible(
-      tryCatch(
-      file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"example_func2standard.mat")[i]),
-      file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"standard2example_func.mat")[i]),
-      file.symlink(from = standardbarin.path,to = file.path(linkmap$destination,"standard.nii.gz")[i]),
-      
-      error = function(x) {
-                      print("something went wrong")
-                    }
-      )
+      if (!file.exists(file.path(linkmap$destination,"example_func2standard.mat")[i])){
+      file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"example_func2standard.mat")[i])
+      file.symlink(from = file.path(linkmap$originplace)[i],to = file.path(linkmap$destination,"standard2example_func.mat")[i])
+      file.symlink(from = standardbarin.path,to = file.path(linkmap$destination,"standard.nii.gz")[i],showWarnings=F)
+      } else {message("meh,already there, if you want to overwirite, do overwrite...")}
+     
       #)
   }
   if(outputmap) {return(linkmap)}
