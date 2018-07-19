@@ -59,6 +59,47 @@ prep.son1<-function(son1_single = NULL,
 }
 
 
+##Con_Frame Prep
+prep.confram<-function(singlesub=NULL) {
+  conframe<-rbind(singlesub[[1]],singlesub[[2]])
+  
+  #PxH
+  conframe$PxH<-FALSE
+  conframe$PxH[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<-TRUE
+  #PxF
+  conframe$PxF<-FALSE
+  conframe$PxF[conframe$Context=="Pleasant" & conframe$Emotion=="Fearful"]<-TRUE
+  #PxN
+  conframe$PxN<-FALSE
+  conframe$PxN[conframe$Context=="Pleasant" & conframe$Emotion=="Neutral"]<-TRUE
+  #UxH
+  conframe$UxH<-FALSE
+  conframe$UxH[conframe$Context=="Unpleasant" & conframe$Emotion=="Happy"]<-TRUE
+  #UxF
+  conframe$UxF<-FALSE
+  conframe$UxF[conframe$Context=="Unpleasant" & conframe$Emotion=="Fearful"]<-TRUE
+  #UxN
+  conframe$UxN<-FALSE
+  conframe$UxN[conframe$Context=="Unpleasant" & conframe$Emotion=="Neutral"]<-TRUE
+  
+  finalist<-list(trial=data.frame(event="trial",
+                                  onset=conframe$ContextOnset,
+                                  duration=conframe$Duration,
+                                  run=conframe$Order,
+                                  trial=conframe$Trial)
+  )
+  finalist$allconcat<-finalist$trial
+  vba<-list(PxH=conframe$PxH,
+            PxF=conframe$PxF,
+            PxN=conframe$PxN,
+            UxH=conframe$UxH,
+            UxF=conframe$UxF,
+            UxN=conframe$UxN)
+  
+  
+  output<-list(event.list=finalist,output.df=conframe,value=vba)
+  return(output)
+}
 
 
 
