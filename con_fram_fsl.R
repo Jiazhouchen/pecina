@@ -56,7 +56,7 @@ if (argu_sc) {
     #Where is the grid to make signal?
     gridpath="grid_sc.csv",
     #What pre-proc data to grab:
-    func.nii.name="nfswudktm*[0-9].nii.gz",
+    func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
     #Does the ID have a tails:
     proc_id_subs=NULL,
     #Now set up the model:
