@@ -83,7 +83,7 @@ argu_4c<-as.environment(list(
   #Where is the grid to make signal?
   gridpath="grid_4c_new.csv",
   #What pre-proc data to grab:
-  func.nii.name="nfswudktm*[0-9].nii.gz",
+  func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
   #Does the ID have a tails:
   proc_id_subs="_a",
   #Now set up the model:
@@ -217,13 +217,7 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
     #Could do better on the regressor thing here; it's hard coded but it could be not hard coded.
     #Also could've just use the regpath in small.sub
     gen_reg(vmodel=argu$model.varinames,regpath=file.path(argu$regpath,argu$model.name),idx=idx,runnum=runnum,env=xarg,regtype = argu$regtype)
-   
-    
-    
-    fsltemplate<-readLines(argu$ssub_fsl_templatepath)
-    
-    
-    feat_w_template(fsltemplate = fsltemplate,
+    feat_w_template(templatepath = argu$ssub_fsl_templatepath,
                     beg = "ARG_",
                     end = "_END",
                     fsf.path = file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_",argu$model.name,".fsf")),
