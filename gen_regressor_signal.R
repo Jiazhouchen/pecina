@@ -34,7 +34,7 @@ regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",
 #Where is the grid to make signal?
 gridpath="grid.csv",
 #What pre-proc data to grab:
-func.nii.name="swudktm*[0-9].nii.gz",
+func.nii.name="nfswudktm*[0-9].nii.gz",
 #Does the ID have a tails:
 proc_id_subs="_a",
 #Now set up the model:
@@ -73,7 +73,7 @@ argu<-argu_8c
 if (argu_4c) {
 argu_4c<-as.environment(list(
   #Number of processes to allow for paralle processing
-  nprocess=3,
+  nprocess=12,
   #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
   stop=NULL,
   #Where is the cfg config file:
@@ -83,7 +83,7 @@ argu_4c<-as.environment(list(
   #Where is the grid to make signal?
   gridpath="grid_4c_new.csv",
   #What pre-proc data to grab:
-  func.nii.name="swudktm*[0-9].nii.gz",
+  func.nii.name="nfswudktm*[0-9].nii.gz",
   #Does the ID have a tails:
   proc_id_subs="_a",
   #Now set up the model:
@@ -178,7 +178,7 @@ if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at 
 
 
 #Step 3: 
-#Now we do the single sub processinggggggggggggg 
+#Now we do the single sub processing 
 
 #let's subset this 
 small.sub<-eapply(allsub.design, function(x) {
@@ -217,14 +217,7 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
     #Could do better on the regressor thing here; it's hard coded but it could be not hard coded.
     #Also could've just use the regpath in small.sub
     gen_reg(vmodel=argu$model.varinames,regpath=file.path(argu$regpath,argu$model.name),idx=idx,runnum=runnum,env=xarg,regtype = argu$regtype)
-    #xarg$infreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_infusion.1D"))
-    #xarg$noinfreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_noinfusion.1D"))
-    #xarg$fbreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_feedback.1D"))
-    #xarg$nofbreg<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_nofeedback.1D"))
-    #xarg$inf_value<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRValueShifted_CS_plac_ctrl.1D"))
-    #xarg$noinf_value<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRValueShifted_CS_plac_ctrl_r.1D"))
-    #xarg$fb_PE<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRPE_CS_reinf_cont.1D"))
-    #xarg$nofb_PE<-file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_twoLRPE_CS_reinf_cont_r.1D"))
+   
     
     
     fsltemplate<-readLines(argu$ssub_fsl_templatepath)
@@ -236,19 +229,13 @@ NU<-parSapply(clusterjobs,small.sub,function(x) {
                     fsf.path = file.path(argu$regpath,argu$model.name,idx,paste0("run",runnum,"_",argu$model.name,".fsf")),
                     envir = xarg)
   
-    #fsltemplate<-readLines(argu$ssub_fsl_templatepath)
-    #subbyrunfeat<-change_fsl_template(fsltemplate = readLines(argu$ssub_fsl_templatepath),begin = "ARG_",end="_END",searchenvir = xarg)
-    #fsfpath<-
-    #writeLines(subbyrunfeat,fsfpath)
-    #system(paste0("feat ",fsfpath),intern = T)
+  
     } else {message(paste("ID:",idx,"RUN:",runnum,",already exists,","to re-run, remove the directory."))}
   }
   
 })
 
 stopCluster(clusterjobs)
-
-
 
 stepnow<-stepnow+1
 if (!is.null(argu$stop)) {if(argu$stop<stepnow+1) {stop(paste0("Made to stop at step ",stepnow))}}
@@ -270,8 +257,7 @@ prepmap<-son.prepare4secondlvl(
   outputmap=TRUE)           
 
 
-
-#Should set up another paralle here:
+#Should set up another parallel here:
 #outputpath average
 #feat# 
 
@@ -334,10 +320,6 @@ if (FALSE) {
   byev<-splitAt(chuckofev,grep("EV [0-9]* title",chuckofev))
   length(byev)->nev
     
-  
-  
-                        
-  
 }
 
 
