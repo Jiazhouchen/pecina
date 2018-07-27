@@ -84,7 +84,8 @@ if (argu_sc) {
     #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
     hig_lvl_path_filter=NULL,
     graphic.threshold=0.95,
-    forcereg=FALSE
+    forcereg=FALSE,
+    ifoverwrite_secondlvl=T
     #Add more universal arguements in here: 
   ))
   argu<-argu_sc
