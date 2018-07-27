@@ -18,15 +18,19 @@ fsl_2_sys_env()
 
 #Model selection
 argu_8c<-FALSE
-argu_4c<-TRUE
-
+argu_4c<-FALSE
+argu_6c<-TRUE
+argu_8c_resp<-FALSE
+#Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 if (argu_8c) {
 #Setting some global options (Putting moving variables here so the function down there could just grab them)
 argu_8c<-as.environment(list(
 #Number of processes to allow for paralle processing
-nprocess=12,
-#If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
-stop=NULL,
+nprocess=NULL,
+#Do only these steps, if NULL then do all. 
+onlyrun=1,2,
+#Force Reg gen restart:
+forcereg=FALSE,
 #Where is the cfg config file:
 cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
 #Where to put/are the regressors 
@@ -63,25 +67,29 @@ glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
 templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
 #Group level analysis output path
 glvl_output="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+#If to redo all the linking for 2nd level
+ifoverwrite_secondlvl=FALSE,
 #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
-hig_lvl_path_filter=NULL 
-
-#Add more universal arguements in here: 
+hig_lvl_path_filter=NULL,
+#Threshold for graphic purposes
+graphic.threshold=0.95
 ))
 argu<-argu_8c
 }
 if (argu_4c) {
 argu_4c<-as.environment(list(
   #Number of processes to allow for paralle processing
-  nprocess=12,
-  #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
-  stop=NULL,
+  nprocess=NULL,
+  #Do only these steps, if NULL then do all. 
+  onlyrun=NULL,
+  #Force Reg gen restart:
+  forcereg=FALSE,
   #Where is the cfg config file:
   cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
   #Where to put/are the regressors 
   regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",
   #Where is the grid to make signal?
-  gridpath="grid_4c_new.csv",
+  gridpath="/Volumes/bek/neurofeedback/scripts/pecina_R/grid_4c_new.csv",
   #What pre-proc data to grab:
   func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
   #Does the ID have a tails:
@@ -108,6 +116,8 @@ argu_4c<-as.environment(list(
   templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
   #Group level analysis output path
   glvl_output="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+  #If to redo all the linking for 2nd level
+  ifoverwrite_secondlvl=FALSE,
   #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
   hig_lvl_path_filter=NULL,
   #Threshold for graphic purposes
@@ -117,12 +127,137 @@ argu_4c<-as.environment(list(
 ))
 argu<-argu_4c
 }
-
+if (argu_6c) {
+  argu_6c<-as.environment(list(
+    #Number of processes to allow for paralle processing
+    nprocess=NULL,
+    #Do only these steps, if NULL then do all. 
+    onlyrun=NULL,
+    #Force Reg gen restart:
+    forcereg=FALSE,
+    #Where is the cfg config file:
+    cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+    #Where to put/are the regressors 
+    regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",
+    #Where is the grid to make signal?
+    gridpath="/Volumes/bek/neurofeedback/scripts/pecina_R/grid_6c_new.csv",
+    #What pre-proc data to grab:
+    func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
+    #Does the ID have a tails:
+    proc_id_subs="_a",
+    #Now set up the model:
+    model.name="PE_6C_reg_by_vol",
+    #Look at the grid! 
+    model.varinames=c("inf",         
+                      "noinf",
+                      "value",
+                      "fb",
+                      "nofb",
+                      "PE"),
+    regtype=".1D", #To use fsl 3 col, do '_FSL3col.txt'
+    #If to convolve with nuisance regressors with dependlab package:
+    ifnuisa=FALSE,
+    #Single subject FSL template path
+    ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_6C_by_run_usedby_R.fsf",
+    #Group level FSL template path
+    gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_4Cbyrun_average_R.fsf",
+    #Single Subject output root path (before model name folder)
+    ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+    #Group lvl output rootpath (before model name folder)
+    glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+    #Brain template path
+    templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+    #Group level analysis output path
+    glvl_output="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+    #If to redo all the linking for 2nd level
+    ifoverwrite_secondlvl=FALSE,
+    #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
+    hig_lvl_path_filter=NULL,
+    #Threshold for graphic purposes
+    graphic.threshold=0.95
+    
+    #Add more universal arguements in here: 
+  ))
+  argu<-argu_6c
+}
+if (argu_8c_resp) {
+  argu_8c_resp<-as.environment(list(
+    #Number of processes to allow for paralle processing
+    nprocess=NULL,
+    #Do only these steps, if NULL then do all. 
+    onlyrun=NULL,
+    #Force Reg gen restart:
+    forcereg=FALSE,
+    #Where is the cfg config file:
+    cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+    #Where to put/are the regressors 
+    regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",
+    #Where is the grid to make signal?
+    gridpath="/Volumes/bek/neurofeedback/scripts/pecina_R/grid_8c_resp.csv",
+    #What pre-proc data to grab:
+    func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
+    #Does the ID have a tails:
+    proc_id_subs="_a",
+    #Now set up the model:
+    model.name="PE_8C_reg_by_vol_resp",
+    #Look at the grid! 
+    model.varinames=c("inf",         
+                      "noinf",
+                      "fb",
+                      "nofb",
+                      "infresp",
+                      "noinfresp",
+                      "fbresp",
+                      "nofbresp"),
+    regtype=".1D", #To use fsl 3 col, do '_FSL3col.txt'
+    #If to convolve with nuisance regressors with dependlab package:
+    ifnuisa=FALSE,
+    #Single subject FSL template path
+    ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_8C_resp.fsf",
+    #Group level FSL template path
+    gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_4Cbyrun_average_R.fsf",
+    #Single Subject output root path (before model name folder)
+    ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+    #Group lvl output rootpath (before model name folder)
+    glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+    #Brain template path
+    templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+    #Group level analysis output path
+    glvl_output="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+    #If to redo all the linking for 2nd level
+    ifoverwrite_secondlvl=FALSE,
+    #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
+    hig_lvl_path_filter=NULL,
+    #Threshold for graphic purposes
+    graphic.threshold=0.95
+    
+    #Add more universal arguements in here: 
+  ))
+  argu<-argu_8c_resp
+}
 ###################
 ##Official Start:##
 #Supposedly you shouldn't need to change anything down below:
 #If you are just switching models
 ###################
+
+#These are for future use of single function run:
+#boxdir<-findbox()
+#son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
+#prep.call.allsub<-lapply(unique(son1_all$Participant),function(x) {
+#  emx<-list(
+#    son1_single=son1_all[which(son1_all$Participant %in% x),]
+#  )
+#  return(emx)
+#})
+#names(prep.call.allsub)<-unique(son1_all$Participant)
+
+
+if (Sys.getenv("USER")=="jiazhouchen") {boxdir <- "/Users/jiazhouchen/Box Sync"
+} else if (Sys.getenv("USER")=="jiazhou") {boxdir <- "/Volumes/bek/Box Sync"} else {
+  boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)}
+
+son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
 
 #Step 1: 
 #Get Behavioral and VBA output Data
