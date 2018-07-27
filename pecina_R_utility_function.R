@@ -20,25 +20,38 @@ prep.son1<-function(son1_single = NULL,
                     adminfilter=1) {
   if (is.null(son1_all)) {stop("NO INPUT")}
   son1_single<-son1_single[which(son1_single$administration==adminfilter),]
+  son1_single$plac_ctrl <- NA
   son1_single$plac_ctrl[son1_single$InfusionNum==1 | son1_single$InfusionNum==2] <- TRUE
   son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
   son1_single$plac_ctrl_r<-!son1_single$plac_ctrl
+  #Creating a binary variable
+  son1_single$plac_ctrl_bin<-son1_single$plac_ctrl
+  son1_single$plac_ctrl_bin[which(son1_single$plac_ctrl_bin)]<-1
+  son1_single$plac_ctrl_bin[which(!son1_single$plac_ctrl_bin)]<-(-1)
+
   
-  son1_single$reinf_cont <- NA
-  son1_single$reinf_cont[son1_single$InfusionNum==1 | son1_single$InfusionNum==3] <- TRUE
-  son1_single$reinf_cont[son1_single$InfusionNum==2 | son1_single$InfusionNum==4] <- FALSE
-  son1_single$reinf_cont_r<-!son1_single$reinf_cont
-  
-  son1_single$InfDur<-son1_single$WillImpOnset - son1_single$InfOnset
-  son1_single$FeedDur<-son1_single$ImprovedOnset - son1_single$Feed2Onset
+  son1_single$signal_baseline <- NA
+  son1_single$signal_baseline[son1_single$Feedback=="Signal"] <- TRUE
+  son1_single$signal_baseline[son1_single$Feedback=="Baseline"] <- FALSE
+  son1_single$signal_baseline_r<-!son1_single$signal_baseline
+  #Creating a binary variable
+  son1_single$signal_baseline_bin<-son1_single$signal_baseline
+  son1_single$signal_baseline_bin[which(son1_single$signal_baseline_bin)]<-1
+  son1_single$signal_baseline_bin[which(!son1_single$signal_baseline_bin)]<-(-1)
   
   vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
   vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
   #Add taskness variables to value
   vba$plac_ctrl<-son1_single$plac_ctrl
   vba$plac_ctrl_r<-son1_single$plac_ctrl_r
-  vba$reinf_cont<-son1_single$reinf_cont
-  vba$reinf_cont_r<-son1_single$reinf_cont_r
+  vba$plac_ctrl_bin<-son1_single$plac_ctrl_bin
+  vba$signal_baseline<-son1_single$signal_baseline
+  vba$signal_baseline_r<-son1_single$signal_baseline_r
+  vba$signal_baseline_bin<-son1_single$signal_baseline_bin
+  
+  #Safe guard this from NaNs:
+  son1_single$WillImpRt[which(is.na(son1_single$WillImpRt))]<-2
+  son1_single$ImprovedRt[which(is.na(son1_single$ImprovedRt))]<-2
   
   finalist<-list(infusion=data.frame(event="infusion",
                                      onset=son1_single$InfOnset,
@@ -49,7 +62,17 @@ prep.son1<-function(son1_single = NULL,
                                      onset=son1_single$Feed2Onset,
                                      duration=son1_single$ImprovedOnset - son1_single$Feed2Onset,
                                      run=son1_single$Run,
-                                     trial=son1_single$TrialNum))
+                                     trial=son1_single$TrialNum),
+                 ExpRat=data.frame(event="ExpRat",
+                                     onset=son1_single$WillImpOnset,
+                                     duration=son1_single$WillImpRt,
+                                     run=son1_single$Run,
+                                     trial=son1_single$TrialNum),
+                 MoodRat=data.frame(event="MoodRat",
+                                   onset=son1_single$ImprovedOnset,
+                                   duration=son1_single$ImprovedRt,
+                                   run=son1_single$Run,
+                                   trial=son1_single$TrialNum))
   for (i in 1:length(finalist)) {
     if (i==1) {ktz<-finalist[[i]]} else {
       ktz<-rbind(ktz,finalist[[i]])}
