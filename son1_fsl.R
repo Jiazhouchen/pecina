@@ -3,6 +3,7 @@
 ############################################
 #Do a source utility scripts from git (when we have enough we will make a function out of it...)
 #Check required packages:
+rm(list = ls())
 require("devtools")
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 #Load utility functions from both sources
@@ -21,10 +22,12 @@ argu_8c<-FALSE
 argu_4c<-FALSE
 argu_6c<-FALSE
 argu_8c_resp<-FALSE
-model0<-F
-model1<-F
+model0<-T
+model1<-T
 model1a<-T
-model2<-F
+model2<-T
+
+if(length(which(sapply(Filter( function(x) 'logical' %in% class( get(x) ), ls() ),function(x) {get(x)})))>1) {multimodels<-TRUE} else {multimodels<-FALSE}
 
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 if (argu_8c) {
@@ -33,7 +36,7 @@ argu_8c<-as.environment(list(
 #Number of processes to allow for paralle processing
 nprocess=NULL,
 #Do only these steps, if NULL then do all. 
-onlyrun=1,2,
+onlyrun=NULL,
 #Force Reg gen restart:
 forcereg=FALSE,
 #Where is the cfg config file:
@@ -465,8 +468,7 @@ if (model2) {
 #})
 #names(prep.call.allsub)<-unique(son1_all$Participant)
 
-#Step 1: 
-#Get Behavioral and VBA output Data
+#Run multiple models;
 if (Sys.getenv("USER")=="jiazhouchen") {boxdir <- "/Users/jiazhouchen/Box Sync"
 } else if (Sys.getenv("USER")=="jiazhou") {boxdir <- "/Volumes/bek/Box Sync"} else {
 boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)}
@@ -480,13 +482,25 @@ son1_rework<-lapply(names(son1_split),function(x) {
 })
 names(son1_rework)<-names(son1_split)
 
-
+if (multimodels) {
+  allargulist <- Filter( function(x) 'environment' %in% class( get(x) ), ls() )
+  allargulist <- allargulist[-grep("argu",allargulist)]
+  for (modelargu in allargulist) {
+    print(modelargu)
+    get(modelargu)->argu
+    fsl_pipe(
+      argu=argu, #This is the arguments environment, each model should have a different one;
+      prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
+      prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
+    )
+  }
+} else {
 fsl_pipe(
   argu=argu, #This is the arguments environment, each model should have a different one;
   prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
   prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
 )
-
+}
 
 
 
