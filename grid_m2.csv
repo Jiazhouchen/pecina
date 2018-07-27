@@ -1,0 +1,7 @@
+﻿ename,norm,normargu,valuefrom,modifier,name,style,comment
+infusion,none,NA,infusion_evt,NA,inf_evt,multiply,taskness
+infusion,none,NA,twoLR_fixD_oneK_vt1,NA,inf_value,multiply,taskness
+feedback,none,NA,feedback_evt,NA,fb_evt,multiply,taskness
+feedback,none,NA,twoLR_fixD_oneK_PEshifted,NA,fb_PE,multiply,taskness
+ExpRat,none,NA,ExpRat_evt,NA,exprat,multiply,
+MoodRat,none,NA,MoodRat_evt,NA,moodrat,multiply,

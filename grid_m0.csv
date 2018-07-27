@@ -1,0 +1,6 @@
+﻿ename,norm,normargu,valuefrom,modifier,name,style,comment
+infusion,none,NA,plac_ctrl,NA,inf,multiply,taskness
+infusion,none,NA,plac_ctrl_r,NA,noinf,multiply,taskness
+feedback,none,NA,signal_baseline,NA,fb,multiply,taskness
+feedback,none,NA,signal_baseline_r,NA,nofb,multiply,taskness
+\n,,,,,,,

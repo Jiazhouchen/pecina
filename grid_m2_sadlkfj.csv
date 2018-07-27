@@ -1,0 +1,7 @@
+﻿ename,norm,normargu,valuefrom,modifier,name,style,comment
+infusion,none,NA,plac_ctrl,NA,inf,subset,taskness
+infusion,none,NA,plac_ctrl_r,NA,noinf,subset,taskness
+infusion,none,NA,twoLR_S_fixD_oneK_vt1shifted,NA,value,subset,vba
+feedback,none,NA,reinf_cont,NA,fb,subset,taskness
+feedback,none,NA,reinf_cont_r,NA,nofb,subset,taskness
+feedback,none,NA,twoLR_S_fixD_oneK_PE,NA,PE,subset,vba
