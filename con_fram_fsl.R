@@ -46,9 +46,9 @@ if (argu_sc) {
   #Setting some global options (Putting moving variables here so the function down there could just grab them)
   argu_sc<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=NULL,
+    nprocess=3,
     #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
-    onlyrun=NULL,
+    onlyrun=4:7,
     #Where is the cfg config file:
     cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
     #Where to put/are the regressors 

@@ -3,7 +3,7 @@
 ############################################
 #Do a source utility scripts from git (when we have enough we will make a function out of it...)
 #Check required packages:
-rm(list = ls())
+#rm(list = ls())
 require("devtools")
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 #Load utility functions from both sources
@@ -22,11 +22,12 @@ argu_8c<-FALSE
 argu_4c<-FALSE
 argu_6c<-FALSE
 argu_8c_resp<-FALSE
-model0<-T
+model0<-F
 model1<-T
 model1a<-T
-model2<-T
+model2<-F
 
+######
 if(length(which(sapply(Filter( function(x) 'logical' %in% class( get(x) ), ls() ),function(x) {get(x)})))>1) {multimodels<-TRUE} else {multimodels<-FALSE}
 
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
@@ -34,7 +35,7 @@ if (argu_8c) {
 #Setting some global options (Putting moving variables here so the function down there could just grab them)
 argu_8c<-as.environment(list(
 #Number of processes to allow for paralle processing
-nprocess=NULL,
+nprocess=3,
 #Do only these steps, if NULL then do all. 
 onlyrun=NULL,
 #Force Reg gen restart:
@@ -87,7 +88,7 @@ argu<-argu_8c
 if (argu_4c) {
 argu_4c<-as.environment(list(
   #Number of processes to allow for paralle processing
-  nprocess=NULL,
+  nprocess=3,
   #Do only these steps, if NULL then do all. 
   onlyrun=NULL,
   #Force Reg gen restart:
@@ -246,7 +247,7 @@ if (argu_8c_resp) {
 if (model0) {
   model0<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=NULL,
+    nprocess=2,
     #Do only these steps, if NULL then do all. 
     onlyrun=NULL,
     #Force Reg gen restart:
@@ -297,7 +298,7 @@ if (model0) {
 if (model1) {
   model1<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=NULL,
+    nprocess=2,
     #Do only these steps, if NULL then do all. 
     onlyrun=NULL,
     #Force Reg gen restart:
@@ -348,9 +349,9 @@ if (model1) {
 if (model1a) {
   model1a<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=NULL,
+    nprocess=2,
     #Do only these steps, if NULL then do all. 
-    onlyrun=1,
+    onlyrun=NULL,
     #Force Reg gen restart:
     forcereg=FALSE,
     #Where is the cfg config file:
@@ -401,7 +402,7 @@ if (model1a) {
 if (model2) {
   model2<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=NULL,
+    nprocess=1,
     #Do only these steps, if NULL then do all. 
     onlyrun=NULL,
     #Force Reg gen restart:
@@ -420,16 +421,16 @@ if (model2) {
     model.name="M2",
     #Look at the grid! 
     model.varinames=c("inf_evt",         
-                      "inf_noinf",
+                      "inf_value",
                       "fb_evt",
-                      "fb_nofb",
+                      "fb_PE",
                       "exprat",
                       "moodrat"),
     regtype=".1D", #To use fsl 3 col, do '_FSL3col.txt'
     #If to convolve with nuisance regressors with dependlab package:
     ifnuisa=FALSE,
     #Single subject FSL template path
-    ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_m1a_usedby_R.fsf",
+    ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_m2_usedby_R.fsf",
     #Group level FSL template path
     gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_m1a_average_R.fsf",
     #Single Subject output root path (before model name folder)
@@ -469,9 +470,13 @@ if (model2) {
 #names(prep.call.allsub)<-unique(son1_all$Participant)
 
 #Run multiple models;
-if (Sys.getenv("USER")=="jiazhouchen") {boxdir <- "/Users/jiazhouchen/Box Sync"
-} else if (Sys.getenv("USER")=="jiazhou") {boxdir <- "/Volumes/bek/Box Sync"} else {
-boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)}
+if (Sys.getenv("USER")=="jiazhouchen") {
+boxdir <- "/Users/jiazhouchen/Box Sync"
+} else if (Sys.getenv("USER")=="jiazhou") {
+boxdir <- "/Volumes/bek/Box Sync"
+} else {
+boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)
+}
 
 son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
 #Split them into mulitiple participants
@@ -488,18 +493,22 @@ if (multimodels) {
   for (modelargu in allargulist) {
     print(modelargu)
     get(modelargu)->argu
+    tryCatch(
+    {
     fsl_pipe(
       argu=argu, #This is the arguments environment, each model should have a different one;
       prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
       prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
+      )
+    },error=function(x) {paste0(modelargu," Failed")}
     )
   }
 } else {
-fsl_pipe(
-  argu=argu, #This is the arguments environment, each model should have a different one;
-  prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
-  prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
-)
+  fsl_pipe(
+    argu=argu, #This is the arguments environment, each model should have a different one;
+    prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
+    prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
+  )
 }
 
 
