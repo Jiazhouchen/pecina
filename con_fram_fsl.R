@@ -1,6 +1,7 @@
 #####Con_Frame Script
 
 #Prepare, setting up resources
+rm(list = ls())
 require("devtools")
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 #Load utility functions from both sources
@@ -11,10 +12,12 @@ devtools::source_url("https://raw.githubusercontent.com/DecisionNeurosciencePsyc
 fsl_2_sys_env()
 
 #Load in behavioral data:
-boxdir<-findbox()
+#boxdir<-findbox()
+boxdir <- "/Volumes/bek/Box Sync"
 if (grepl(" ",boxdir)) {
   sub("Box Sync","/'Box Sync/'",boxdir)->boxdir
 }
+
 #Sort data into right format: 
 datafolder<-file.path(boxdir,"GitHub","SC_task","SC_responses")
 lfilepath<-system(paste0("find ",datafolder," -name '*.csv' -maxdepth 2 -mindepth 1 -type f"),intern = T)

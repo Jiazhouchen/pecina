@@ -3,17 +3,13 @@
 ############################################
 #Do a source utility scripts from git (when we have enough we will make a function out of it...)
 #Check required packages:
-#rm(list = ls())
+rm(list = ls())
 require("devtools")
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 #Load utility functions from both sources
-if (file.exists("pecina_R_utility_function.R")){
-  source("pecina_R_utility_function.R")
-} else {
-  devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/pecina_R_utility_function.R")
-}
-devtools::source_url("https://raw.githubusercontent.com/DecisionNeurosciencePsychopathology/fMRI_R/master/dnpl_utility.R")
 
+devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/pecina_R_utility_function.R")
+devtools::source_url("https://raw.githubusercontent.com/DecisionNeurosciencePsychopathology/fMRI_R/master/dnpl_utility.R")
 #Setting up FSL global enviroment variables in case we are using RStudio 
 fsl_2_sys_env()
 
@@ -23,9 +19,9 @@ argu_4c<-FALSE
 argu_6c<-FALSE
 argu_8c_resp<-FALSE
 model0<-F
-model1<-T
-model1a<-T
-model2<-F
+model1<-F
+model1a<-F
+model2<-T
 
 ######
 if(length(which(sapply(Filter( function(x) 'logical' %in% class( get(x) ), ls() ),function(x) {get(x)})))>1) {multimodels<-TRUE} else {multimodels<-FALSE}
@@ -402,7 +398,7 @@ if (model1a) {
 if (model2) {
   model2<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=1,
+    nprocess=12,
     #Do only these steps, if NULL then do all. 
     onlyrun=NULL,
     #Force Reg gen restart:
@@ -470,13 +466,13 @@ if (model2) {
 #names(prep.call.allsub)<-unique(son1_all$Participant)
 
 #Run multiple models;
-if (Sys.getenv("USER")=="jiazhouchen") {
-boxdir <- "/Users/jiazhouchen/Box Sync"
-} else if (Sys.getenv("USER")=="jiazhou") {
+#if (Sys.getenv("USER")=="jiazhouchen") {
+#boxdir <- "/Users/jiazhouchen/Box Sync"
+#} else if (Sys.getenv("USER")=="jiazhou") {
 boxdir <- "/Volumes/bek/Box Sync"
-} else {
-boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)
-}
+#} else {
+#boxdir<-system("find ~ -iname 'Box*' -maxdepth 2 -type d",intern = T)
+#}
 
 son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
 #Split them into mulitiple participants

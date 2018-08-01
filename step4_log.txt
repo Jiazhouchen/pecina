@@ -769,3 +769,178 @@ This person already got average done!
 This person already got average done!
 This person already got average done!
 This person already got average done!
+starting worker pid=26476 on localhost:11437 at 18:24:26.941
+starting worker pid=26477 on localhost:11437 at 18:24:26.976
+starting worker pid=26478 on localhost:11437 at 18:24:26.985
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+starting worker pid=26577 on localhost:11914 at 18:25:44.039
+starting worker pid=26578 on localhost:11914 at 18:25:44.067
+starting worker pid=26579 on localhost:11914 at 18:25:44.075
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+This person already got average done!
+starting worker pid=83094 on localhost:11262 at 02:07:41.437
+starting worker pid=83095 on localhost:11262 at 02:07:41.466
+starting worker pid=83096 on localhost:11262 at 02:07:41.475
+starting worker pid=83097 on localhost:11262 at 02:07:41.484
+starting worker pid=83098 on localhost:11262 at 02:07:41.493
+starting worker pid=83099 on localhost:11262 at 02:07:41.501
+starting worker pid=83100 on localhost:11262 at 02:07:41.511
+starting worker pid=83101 on localhost:11262 at 02:07:41.521
+starting worker pid=83102 on localhost:11262 at 02:07:41.530
+starting worker pid=83103 on localhost:11262 at 02:07:41.538
+starting worker pid=83104 on localhost:11262 at 02:07:41.547
+starting worker pid=83105 on localhost:11262 at 02:07:41.556
+Initializing gfeat for participant: SON1_999
+starting to do feat...
+Initializing gfeat for participant: SON1_996
+starting to do feat...
+Initializing gfeat for participant: SON1_994
+starting to do feat...
+Initializing gfeat for participant: SON1_023
+starting to do feat...
+Initializing gfeat for participant: SON1_021
+starting to do feat...
+Initializing gfeat for participant: SON1_019
+starting to do feat...
+Initializing gfeat for participant: SON1_016
+starting to do feat...
+Initializing gfeat for participant: SON1_014
+starting to do feat...
+Initializing gfeat for participant: SON1_012
+starting to do feat...
+Initializing gfeat for participant: SON1_010
+starting to do feat...
+Initializing gfeat for participant: SON1_006
+starting to do feat...
+Initializing gfeat for participant: SON1_004
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_998
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_020
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_022
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_995
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_993
+starting to do feat...
+feat completed
+feat completed
+Initializing gfeat for participant: SON1_015
+Initializing gfeat for participant: SON1_018
+starting to do feat...
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_013
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_011
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_005
+feat completed
+Initializing gfeat for participant: SON1_009
+starting to do feat...
+starting to do feat...
+feat completed
+Initializing gfeat for participant: SON1_003
+starting to do feat...
+feat completed
+feat completed
+Initializing gfeat for participant: SON1_997
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing gfeat for participant: SON1_017
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing gfeat for participant: SON1_002
+starting to do feat...
+feat completed
+feat completed
+feat completed
