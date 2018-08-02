@@ -927,3 +927,360 @@ starting to do feat...
 feat completed
 feat completed
 feat completed
+starting worker pid=5256 on localhost:11678 at 15:37:10.629
+starting worker pid=5257 on localhost:11678 at 15:37:10.637
+starting worker pid=5258 on localhost:11678 at 15:37:10.645
+starting worker pid=5259 on localhost:11678 at 15:37:10.653
+starting worker pid=5260 on localhost:11678 at 15:37:10.661
+starting worker pid=5261 on localhost:11678 at 15:37:10.669
+Initializing feat for participant: SON1_999_a, and run: 1
+Initializing feat for participant: SON1_022_a, and run: 1
+Initializing feat for participant: SON1_017_a, and run: 1
+Initializing feat for participant: SON1_014_a, and run: 1
+Initializing feat for participant: SON1_010_a, and run: 1
+Initializing feat for participant: SON1_004_a, and run: 1
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+[1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1][1] "something went wrong..." "something went wrong..." "something went wrong..."
+[1]
+
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."[1]
+ "something went wrong..."
+ "something went wrong..."
+[1][1] "something went wrong..." "something went wrong..."
+
+[1] "something went wrong..."
+[1][1][1] "something went wrong..."
+ "something went wrong..." "something went wrong..."
+
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing feat for participant: SON1_013_b, and run: 1
+Initializing feat for participant: SON1_016_b, and run: 1
+Initializing feat for participant: SON1_003_b, and run: 1
+Initializing feat for participant: SON1_021_a, and run: 1
+Initializing feat for participant: SON1_998_a, and run: 1
+Initializing feat for participant: SON1_009_b, and run: 1
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1][1] "something went wrong..." "something went wrong..." "something went wrong..."
+
+
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1][1][1] "something went wrong..." "something went wrong..." "something went wrong..."
+ "something went wrong..."
+
+[1]
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..." "something went wrong..."
+
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing feat for participant: SON1_016_a, and run: 1
+Initializing feat for participant: SON1_003_a, and run: 1
+Initializing feat for participant: SON1_009_a, and run: 1
+Initializing feat for participant: SON1_020_a, and run: 1
+Initializing feat for participant: SON1_997_a, and run: 1
+Initializing feat for participant: SON1_013_a, and run: 1
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."[1]
+ "something went wrong..."
+[1] "something went wrong..."[1]
+ "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1][1] "something went wrong..." "something went wrong..."
+
+ "something went wrong..."
+[1][1] "something went wrong..." "something went wrong..."
+
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..." "something went wrong..."
+
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing feat for participant: SON1_019_a, and run: 1
+Initializing feat for participant: SON1_012_b, and run: 1
+Initializing feat for participant: SON1_002_b, and run: 1
+Initializing feat for participant: SON1_015_b, and run: 1
+Initializing feat for participant: SON1_006_a, and run: 1
+Initializing feat for participant: SON1_996_a, and run: 1
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..." "something went wrong..."
+
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing feat for participant: SON1_005_a, and run: 1
+feat completed
+Initializing feat for participant: SON1_012_a, and run: 1
+Initializing feat for participant: SON1_018_a, and run: 1
+Initializing feat for participant: SON1_002_a, and run: 1
+Initializing feat for participant: SON1_015_a, and run: 1
+feat completed
+Initializing feat for participant: SON1_995_a, and run: 1
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+[1] "something went wrong..." "something went wrong..."
+
+[1][1] "something went wrong..."
+[1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1][1][1] "something went wrong..."
+ "something went wrong..." "something went wrong..."
+
+[1][1][1] "something went wrong..." "something went wrong..."
+
+ "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing feat for participant: SON1_011_b, and run: 1
+Initializing feat for participant: SON1_001_b, and run: 1
+feat completed
+Initializing feat for participant: SON1_004_b, and run: 1
+feat completed
+Initializing feat for participant: SON1_017_b, and run: 1
+Initializing feat for participant: SON1_014_b, and run: 1
+Initializing feat for participant: SON1_993_a, and run: 1
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..." "something went wrong..."
+
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."[1]
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+starting to do feat...
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+feat completed
+Initializing feat for participant: SON1_011_a, and run: 1
+Initializing feat for participant: SON1_001_a, and run: 1
+Initializing feat for participant: SON1_023_a, and run: 1
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1][1] "something went wrong..." "something went wrong..."
+
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1][1] "something went wrong..."
+ "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+[1] "something went wrong..."
+starting to do feat...
+starting to do feat...
+starting to do feat...
+feat completed
+feat completed
+feat completed
