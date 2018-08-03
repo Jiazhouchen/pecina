@@ -83,7 +83,7 @@ xj<-lapply(allpd, function(x) {
     file.copy(from = file.path(file.path(x,"rest_proc","rest1"),y),to = file.path(argu$regpath,argu$model.name,id,"run1_roi.1D"))
     nuisa<-NULL
     tryCatch({
-    nuisa<-get_nuisance_preproc(id=id,cfgfilepath = argu$cfgpath,returnas = "data.frame") },error=function(e){})
+    nuisa<-get_nuisance_preproc(id=id,cfgfilepath = argu$cfgpath,dothese="motion",returnas = "data.frame") },error=function(e){})
     if (!is.null(nuisa)){
       for (k in 1:length(nuisa)) {
         write.table(as.matrix(nuisa[[k]]),file.path(regpath,model.name,id,
