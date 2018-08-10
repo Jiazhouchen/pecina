@@ -36,7 +36,7 @@ if (model_basic) {
     #Number of processes to allow for paralle processing
     nprocess=4, #Running on Jiazhou's do 4, Thorndike can handle 12; 
     #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
-    onlyrun=2:7,
+    onlyrun=2:4,
     #Where is the cfg config file:
     cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/reststate_son1.cfg",
     #Where to put/are the regressors 
@@ -44,7 +44,8 @@ if (model_basic) {
     #Where is the grid to make signal?
     gridpath="grid_sc.csv",
     #What pre-proc data to grab:
-    func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
+    #swuktm_rest1_5.nii
+    func.nii.name="swuktm*[0-9]_[0-9].nii.gz",
     #Does the ID have a tails:
     proc_id_subs=NULL,
     #Now set up the model:
@@ -86,7 +87,7 @@ xj<-lapply(allpd, function(x) {
     nuisa<-get_nuisance_preproc(id=id,cfgfilepath = argu$cfgpath,dothese="motion",returnas = "data.frame") },error=function(e){})
     if (!is.null(nuisa)){
       for (k in 1:length(nuisa)) {
-        write.table(as.matrix(nuisa[[k]]),file.path(regpath,model.name,id,
+        write.table(as.matrix(nuisa[[k]]),file.path(argu$regpath,argu$model.name,id,
                                                     paste0("run",1,"_nuisance_regressor_with_motion.txt")),
                     row.names = F,col.names = FALSE)
       }}
@@ -105,6 +106,8 @@ for (ix in 1:length(allidz)) {
   allsub[[idy]]<-list(ID=idy,run_volumes=allvolumez[ix],regpath=file.path(argu$regpath,argu$model.name,idy),preprocID=idy)
 }
 as.environment(allsub)->allsub.design
+
+stop()
 
 fsl_pipe(
         argu=argu, #This is the arguments environment, each model should have a different one;
