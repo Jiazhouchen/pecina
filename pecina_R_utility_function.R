@@ -38,7 +38,6 @@ prep.son1<-function(son1_single = NULL,
   son1_single$signal_baseline_bin<-son1_single$signal_baseline
   son1_single$signal_baseline_bin[which(son1_single$signal_baseline_bin)]<-1
   son1_single$signal_baseline_bin[which(!son1_single$signal_baseline_bin)]<-(-1)
-  
   vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
   vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
   #Add taskness variables to value
@@ -49,6 +48,8 @@ prep.son1<-function(son1_single = NULL,
   vba$signal_baseline_r<-son1_single$signal_baseline_r
   vba$signal_baseline_bin<-son1_single$signal_baseline_bin
   
+  vba$ExpRat_bin<-plyr::mapvalues(x = son1_single$WillImpRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
+  vba$MoodRat_bin<-plyr::mapvalues(x = son1_single$ImprovedRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
   #Safe guard this from NaNs:
   son1_single$WillImpRt[which(is.na(son1_single$WillImpRt))]<-2
   son1_single$ImprovedRt[which(is.na(son1_single$ImprovedRt))]<-2
