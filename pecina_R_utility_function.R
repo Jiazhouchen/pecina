@@ -54,6 +54,9 @@ prep.son1<-function(son1_single = NULL,
   son1_single$WillImpRt[which(is.na(son1_single$WillImpRt))]<-2
   son1_single$ImprovedRt[which(is.na(son1_single$ImprovedRt))]<-2
   
+  vba$ExpRat_bin[which(is.na(vba$ExpRat_bin))]<-0
+  vba$MoodRat_bin[which(is.na(vba$MoodRat_bin))]<-0
+  
   finalist<-list(infusion=data.frame(event="infusion",
                                      onset=son1_single$InfOnset,
                                      duration=son1_single$WillImpOnset - son1_single$InfOnset,
