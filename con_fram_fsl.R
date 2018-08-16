@@ -49,9 +49,9 @@ if (argu_sc) {
   #Setting some global options (Putting moving variables here so the function down there could just grab them)
   argu_sc<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=3,
+    nprocess=2,
     #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
-    onlyrun=4:7,
+    onlyrun=5:7,
     #Where is the cfg config file:
     cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
     #Where to put/are the regressors 
@@ -63,7 +63,7 @@ if (argu_sc) {
     #Does the ID have a tails:
     proc_id_subs=NULL,
     #Now set up the model:
-    model.name="con_framing_basic",
+    model.name="con_framing_basic_nalt",
     #Look at the grid! 
     model.varinames=c("PxH",         
                       "PxF",
@@ -96,8 +96,7 @@ if (argu_sc) {
 
 
 
-fsl_pipe(
-        argu=argu, #This is the arguments environment, each model should have a different one;
+fsl_pipe(argu=argu,
         prep.call.func="prep.confram", #This should be a character string that's the name of the prep proc function
         prep.call.allsub=as.list(tempenvir) #List of ID list of arguments for prep.call.
 )
