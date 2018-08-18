@@ -566,7 +566,7 @@ if (model1ab) {
   argu<-model1ab
 }
 if (model1ac) {
-  model1ab<-as.environment(list(
+  model1ac<-as.environment(list(
     #Number of processes to allow for paralle processing
     nprocess=4,
     #Do only these steps, if NULL then do all. 
