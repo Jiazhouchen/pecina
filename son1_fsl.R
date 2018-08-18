@@ -485,8 +485,10 @@ if (model1aa) {
     ifnuisa=FALSE,
     #Single subject FSL template path
     ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_m1aa_usedby_R.fsf",
-    #Group level FSL template path
-    gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_m1aa_average_R.fsf",
+    #ADAPTIVE GROUP LEVEL GFEAT TEMPLATE;
+    adaptive_gfeat=TRUE,
+    #Group level FSL template path [MAYBE LATER DEPRECIATE THIS COMAND AND JUST PUT IT TO GITHUB / PACK IT]
+    gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
     #Single Subject output root path (before model name folder)
     ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
     #Group lvl output rootpath (before model name folder)
@@ -540,8 +542,15 @@ if (model1ab) {
     ifnuisa=FALSE,
     #Single subject FSL template path
     ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_m1ab_usedby_R.fsf",
+<<<<<<< HEAD
     #Group level FSL template path
     gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_m1aa_average_R.fsf",
+=======
+    #ADAPTIVE GROUP LEVEL GFEAT TEMPLATE;
+    adaptive_gfeat=TRUE,
+    #Group level FSL template path
+    gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
+>>>>>>> a364d0f72074a7381b1628d2466eacf3c87a3b9d
     #Single Subject output root path (before model name folder)
     ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
     #Group lvl output rootpath (before model name folder)
