@@ -24,8 +24,8 @@ model1<-F
 model1a<-F
 model2<-F
 model1aa<-F
-model1ab<-F
-model1ac<-T
+r_model1ab<-T #we redo this bc convolution 
+model1ac<-F
 ######
 if(length(which(sapply(Filter( function(x) 'logical' %in% class( get(x) ), ls() ),function(x) {get(x)})))>1) {multimodels<-TRUE} else {multimodels<-FALSE}
 
@@ -508,8 +508,8 @@ if (model1aa) {
   ))
   argu<-model1aa
 }
-if (model1ab) {
-  model1ab<-as.environment(list(
+if (r_model1ab) {
+  r_model1ab<-as.environment(list(
     #Number of processes to allow for paralle processing
     nprocess=4,
     #Do only these steps, if NULL then do all. 
@@ -527,7 +527,7 @@ if (model1ab) {
     #Does the ID have a tails:
     proc_id_subs="_a",
     #Now set up the model:
-    model.name="M1ab",
+    model.name="M1ab_re",
     #Look at the grid! 
     model.varinames=c("inf_evt",         
                       "inf_noinf",
@@ -563,7 +563,7 @@ if (model1ab) {
     
     #Add more universal arguements in here: 
   ))
-  argu<-model1ab
+  argu<-r_model1ab
 }
 if (model1ac) {
   model1ac<-as.environment(list(

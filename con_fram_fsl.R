@@ -49,9 +49,9 @@ if (argu_sc) {
   #Setting some global options (Putting moving variables here so the function down there could just grab them)
   argu_sc<-as.environment(list(
     #Number of processes to allow for paralle processing
-    nprocess=2,
+    nprocess=8,
     #If at any point you wish to stop the function, input step number here: ; if NULL then will be ignored.
-    onlyrun=5:7,
+    onlyrun=NULL,
     #Where is the cfg config file:
     cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
     #Where to put/are the regressors 
@@ -62,8 +62,10 @@ if (argu_sc) {
     func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
     #Does the ID have a tails:
     proc_id_subs=NULL,
+    #How to separate IDs into groups;
+    group_id_sep=c('Nalt','Plac'),
     #Now set up the model:
-    model.name="con_framing_basic_nalt",
+    model.name="con_framing_basic_redo",
     #Look at the grid! 
     model.varinames=c("PxH",         
                       "PxF",
@@ -76,8 +78,9 @@ if (argu_sc) {
     ifnuisa=FALSE,
     #Single subject FSL template path
     ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_cf_template_R.fsf",
+    adaptive_gfeat=TRUE,
     #Group level FSL template path
-    gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_cf_template_average_R.fsf",
+    gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
     #Single Subject output root path (before model name folder)
     ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",
     #Group lvl output rootpath (before model name folder)
