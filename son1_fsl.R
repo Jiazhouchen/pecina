@@ -8,7 +8,6 @@ require("devtools")
 devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R")
 library(fslpipe)
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
-
 source('pecina_R_utility_function.R')
 
 #Setting up FSL global enviroment variables in case we are using RStudio 

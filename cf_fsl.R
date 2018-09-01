@@ -7,7 +7,7 @@ devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R")
 library(fslpipe)
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 #Load utility functions from both sources
-devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/pecina/master/pecina_R_utility_function.R")
+source('pecina_R_utility_function.R')
 devtools::source_url("https://raw.githubusercontent.com/Jiazhouchen/con_frame/master/cf_behav.R")
 #Setting up FSL global enviroment variables in case we are using RStudio 
 fsl_2_sys_env()
