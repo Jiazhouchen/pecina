@@ -24,7 +24,8 @@ argu<-as.environment(list(nprocess=4,onlyrun=NULL,proc_id_subs=NULL,regtype=".1D
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
                           ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",
                           glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/grpanal/fsl",
-                          templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii"
+                          templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                          nuisa_motion=c("nuisance","motion_par","motion_outlier"),motion_type="fd",motion_threshold="default",convlv_nuisa=F
 ))
 
 #Which model to run:
