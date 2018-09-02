@@ -135,7 +135,11 @@ prep.confram<-function(singlesub=NULL) {
                                  run=conframe$Order,
                                  trial=conframe$Trial)
   )
-  finalist$allconcat<-finalist$trial
+  for (i in 1:length(finalist)) {
+    if (i==1) {ktz<-finalist[[i]]} else {
+      ktz<-rbind(ktz,finalist[[i]])}
+  }
+  finalist[["allconcat"]]<-ktz
   vba<-list(PxH=conframe$PxH,
             PxF=conframe$PxF,
             PxN=conframe$PxN,

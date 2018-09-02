@@ -35,7 +35,7 @@ M_RTConv=TRUE
 #Differentiate argument for different models here:
 if (M_base) {
   argu$gridpath<-"grid_sc.csv"
-  argu$model.name="con_framing_basic_redo"
+  argu$model.name="con_framing_new_cope_MC"
   argu$model.varinames=c("PxH",        
                          "PxF",
                          "PxN",
