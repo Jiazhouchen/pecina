@@ -16,7 +16,7 @@ fsl_2_sys_env()
 #boxdir<-findbox()
 boxdir <- "/Volumes/bek/Box Sync"
 #Setting default options
-argu<-as.environment(list(nprocess=4,onlyrun=NULL,proc_id_subs=NULL,regtype=".1D",ifnuisa=FALSE,adaptive_gfeat=TRUE,
+argu<-as.environment(list(nprocess=6,onlyrun=NULL,proc_id_subs=NULL,regtype=".1D",ifnuisa=FALSE,adaptive_gfeat=TRUE,
                           hig_lvl_path_filter=NULL,cluster_thresh = 3,whichttest = c("paired","onesample"),
                           group_id_sep=c('Nalt','Plac'),graphic.threshold=0.95,forcereg=FALSE,ifoverwrite_secondlvl=F,
                           cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
@@ -25,17 +25,17 @@ argu<-as.environment(list(nprocess=4,onlyrun=NULL,proc_id_subs=NULL,regtype=".1D
                           ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",
                           glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/grpanal/fsl",
                           templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
-                          nuisa_motion=c("nuisance","motion_par","motion_outlier"),motion_type="fd",motion_threshold="default",convlv_nuisa=F
+                          nuisa_motion=c("nuisance","motion_par"),motion_type="fd",motion_threshold="default",convlv_nuisa=F
 ))
 
 #Which model to run:
-M_base=FALSE
-M_RTConv=TRUE
+M_base=TRUE
+M_RTConv=FALSE
 
 #Differentiate argument for different models here:
 if (M_base) {
   argu$gridpath<-"grid_sc.csv"
-  argu$model.name="con_framing_new_cope_MC"
+  argu$model.name="con_framing_new_cope"
   argu$model.varinames=c("PxH",        
                          "PxF",
                          "PxN",

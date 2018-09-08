@@ -25,9 +25,11 @@ prep.son1<-function(son1_single = NULL,
   son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
   son1_single$plac_ctrl_r<-!son1_single$plac_ctrl
   #Creating a binary variable
-  son1_single$plac_ctrl_bin<-son1_single$plac_ctrl
-  son1_single$plac_ctrl_bin[which(son1_single$plac_ctrl_bin)]<-1
-  son1_single$plac_ctrl_bin[which(!son1_single$plac_ctrl_bin)]<-(-1)
+  #son1_single$plac_ctrl_bin<-son1_single$plac_ctrl
+  son1_single$plac_ctrl_bin <- NA
+  son1_single$plac_ctrl_bin[which(is.na(son1_single$plac_ctrl))]<-0
+  son1_single$plac_ctrl_bin[which(son1_single$plac_ctrl)]<-1
+  son1_single$plac_ctrl_bin[which(!son1_single$plac_ctrl)]<-(-1)
 
   
   son1_single$signal_baseline <- NA
@@ -35,9 +37,31 @@ prep.son1<-function(son1_single = NULL,
   son1_single$signal_baseline[son1_single$Feedback=="Baseline"] <- FALSE
   son1_single$signal_baseline_r<-!son1_single$signal_baseline
   #Creating a binary variable
-  son1_single$signal_baseline_bin<-son1_single$signal_baseline
-  son1_single$signal_baseline_bin[which(son1_single$signal_baseline_bin)]<-1
-  son1_single$signal_baseline_bin[which(!son1_single$signal_baseline_bin)]<-(-1)
+  son1_single$signal_baseline_bin<-NA
+  son1_single$signal_baseline_bin[which(son1_single$signal_baseline)]<-1
+  son1_single$signal_baseline_bin[which(!son1_single$signal_baseline)]<-(-1)
+  
+  son1_single$ExpRat<-NA
+  son1_single$ExpRat[son1_single$WillImpRespText=="Yes"] <- TRUE
+  son1_single$ExpRat[son1_single$WillImpRespText=="No"] <- FALSE
+  
+  son1_single$ExpRat_bin<-NA
+  son1_single$ExpRat_bin[which(is.na(son1_single$ExpRat))]<-0
+  son1_single$ExpRat_bin[which(son1_single$ExpRat)]<-1
+  son1_single$ExpRat_bin[which(!son1_single$ExpRat)]<-(-1)
+  
+  son1_single$MoodRat<-NA
+  son1_single$MoodRat[son1_single$ImprovedRespText=="Yes"] <- TRUE
+  son1_single$MoodRat[son1_single$ImprovedRespText=="No"] <- FALSE
+  
+  son1_single$MoodRat_bin<-NA
+  son1_single$MoodRat_bin[which(is.na(son1_single$MoodRat))]<-0
+  son1_single$MoodRat_bin[which(son1_single$MoodRat)]<-1
+  son1_single$MoodRat_bin[which(!son1_single$MoodRat)]<-(-1)
+  
+  
+  
+  
   vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
   vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
   #Add taskness variables to value
@@ -47,15 +71,18 @@ prep.son1<-function(son1_single = NULL,
   vba$signal_baseline<-son1_single$signal_baseline
   vba$signal_baseline_r<-son1_single$signal_baseline_r
   vba$signal_baseline_bin<-son1_single$signal_baseline_bin
-  
-  vba$ExpRat_bin<-plyr::mapvalues(x = son1_single$WillImpRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
-  vba$MoodRat_bin<-plyr::mapvalues(x = son1_single$ImprovedRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
+  vba$MoodRat<-son1_single$MoodRat
+  vba$MoodRat_bin<-son1_single$MoodRat_bin
+  vba$ExpRat<-son1_single$ExpRat
+  vba$ExpRat_bin<-son1_single$ExpRat_bin
+
+  #vba$ExpRat_bin<-plyr::mapvalues(x = son1_single$WillImpRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
+  #vba$MoodRat_bin<-plyr::mapvalues(x = son1_single$ImprovedRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
   #Safe guard this from NaNs:
   son1_single$WillImpRt[which(is.na(son1_single$WillImpRt))]<-2
   son1_single$ImprovedRt[which(is.na(son1_single$ImprovedRt))]<-2
   
-  vba$ExpRat_bin[which(is.na(vba$ExpRat_bin))]<-0
-  vba$MoodRat_bin[which(is.na(vba$MoodRat_bin))]<-0
+  
   
   finalist<-list(infusion=data.frame(event="infusion",
                                      onset=son1_single$InfOnset,
