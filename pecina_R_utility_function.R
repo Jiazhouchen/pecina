@@ -19,7 +19,10 @@ prep.son1<-function(son1_single = NULL,
                                        'WillImpRt','administration','subject_id','plac_ctrl','reinf_cont','plac','plac_ctrl_r','reinf_cont_r'),
                     adminfilter=1) {
   if (is.null(son1_all)) {stop("NO INPUT")}
+  #print("This is current Ver.")
   son1_single<-son1_single[which(son1_single$administration==adminfilter),]
+  vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
+  vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
   son1_single$plac_ctrl <- NA
   son1_single$plac_ctrl[son1_single$InfusionNum==1 | son1_single$InfusionNum==2] <- TRUE
   son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
@@ -45,10 +48,15 @@ prep.son1<-function(son1_single = NULL,
   son1_single$ExpRat[son1_single$WillImpRespText=="Yes"] <- TRUE
   son1_single$ExpRat[son1_single$WillImpRespText=="No"] <- FALSE
   
+  son1_single$ExpRat_pm<-NA
+  son1_single$ExpRat_pm[son1_single$WillImpRespText=="Yes"] <- (1)
+  son1_single$ExpRat_pm[son1_single$WillImpRespText=="No"] <- (-1)
+  
   son1_single$ExpRat_bin<-NA
   son1_single$ExpRat_bin[which(is.na(son1_single$ExpRat))]<-0
   son1_single$ExpRat_bin[which(son1_single$ExpRat)]<-1
   son1_single$ExpRat_bin[which(!son1_single$ExpRat)]<-(-1)
+
   
   son1_single$MoodRat<-NA
   son1_single$MoodRat[son1_single$ImprovedRespText=="Yes"] <- TRUE
@@ -59,11 +67,25 @@ prep.son1<-function(son1_single = NULL,
   son1_single$MoodRat_bin[which(son1_single$MoodRat)]<-1
   son1_single$MoodRat_bin[which(!son1_single$MoodRat)]<-(-1)
   
+  son1_single$PE_correct<-NA
+  son1_single$PE_correct[which(is.na(son1_single$ExpRat))]<-0
+  son1_single$PE_correct[which(son1_single$ExpRat == son1_single$signal_baseline)] <- 0
+  son1_single$PE_correct[which(!son1_single$ExpRat & son1_single$signal_baseline)]<-1
+  son1_single$PE_correct[which(son1_single$ExpRat & !son1_single$signal_baseline)]<- (-1)
+  
+  son1_single$PE_congruent<-NA
+  son1_single$PE_congruent[which(is.na(son1_single$ExpRat))]<-0
+  son1_single$PE_congruent[which(son1_single$ExpRat == son1_single$signal_baseline)] <- 1
+  son1_single$PE_congruent[which(son1_single$ExpRat != son1_single$signal_baseline)]<- (-1)
+  
+  son1_single$MoodRat_Miss<-FALSE
+  son1_single$MoodRat_Miss[which(is.na(son1_single$MoodRat))]<-TRUE
+  
+  son1_single$ExpRat_Miss<-FALSE
+  son1_single$ExpRat_Miss[which(is.na(son1_single$ExpRat))]<-TRUE
   
   
-  
-  vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
-  vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
+  vba<-as.list(son1_single[c(!names(son1_single) %in% regualrvarinames)])
   #Add taskness variables to value
   vba$plac_ctrl<-son1_single$plac_ctrl
   vba$plac_ctrl_r<-son1_single$plac_ctrl_r
@@ -75,7 +97,12 @@ prep.son1<-function(son1_single = NULL,
   vba$MoodRat_bin<-son1_single$MoodRat_bin
   vba$ExpRat<-son1_single$ExpRat
   vba$ExpRat_bin<-son1_single$ExpRat_bin
-
+  #vba$twoLR_fixD_oneK_vt1_centerscaled<-as.numeric(scale(son1_single$twoLR_fixD_oneK_vt1,center=T))
+  #vba$twoLR_fixD_oneK_PEshifted_centerscaled<-as.numeric(scale(son1_single$twoLR_fixD_oneK_PEshifted,center=T))
+  vba$oneLR_fixD_oneK_vt1_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_vt1,center=T))
+  vba$oneLR_fixD_oneK_PEshifted_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_PEshifted,center=T))
+  vba$PE_congruent_centerscaled<-scale(son1_single$PE_congruent,center = T)
+  
   #vba$ExpRat_bin<-plyr::mapvalues(x = son1_single$WillImpRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
   #vba$MoodRat_bin<-plyr::mapvalues(x = son1_single$ImprovedRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
   #Safe guard this from NaNs:
@@ -132,6 +159,7 @@ prep.son1<-function(son1_single = NULL,
 prep.confram<-function(singlesub=NULL) {
   conframe<-rbind(singlesub[[1]],singlesub[[2]])
   
+  conframe$Rating_w_bias[is.na(conframe$Rating_w_bias)]<-0
   #PxH
   conframe$PxH<-FALSE
   conframe$PxH[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<-TRUE
@@ -172,7 +200,13 @@ prep.confram<-function(singlesub=NULL) {
             PxN=conframe$PxN,
             UxH=conframe$UxH,
             UxF=conframe$UxF,
-            UxN=conframe$UxN)
+            UxN=conframe$UxN,
+            PxH_v=as.numeric(conframe$PxH) * conframe$Rating_w_bias,
+            PxF_v=as.numeric(conframe$PxF) * conframe$Rating_w_bias,
+            PxN_v=as.numeric(conframe$PxN) * conframe$Rating_w_bias,
+            UxH_v=as.numeric(conframe$UxH) * conframe$Rating_w_bias,
+            UxF_v=as.numeric(conframe$UxF) * conframe$Rating_w_bias,
+            UxN_v=as.numeric(conframe$UxN) * conframe$Rating_w_bias)
   
   
   output<-list(event.list=finalist,output.df=conframe,value=vba)

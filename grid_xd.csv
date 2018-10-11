@@ -1,0 +1,13 @@
+ename,norm,normargu,valuefrom,modifier,name,style,comment
+trial,none,NA,PxH,NA,PxH,subset,taskness
+trial,none,NA,PxF,NA,PxF,subset,taskness
+trial,none,NA,PxN,NA,PxN,subset,taskness
+trial,none,NA,UxH,NA,UxH,subset,taskness
+trial,none,NA,UxF,NA,UxF,subset,taskness
+trial,none,NA,UxN,NA,UxN,subset,taskness
+trial,none,NA,PxH_v,NA,PxH_v,subset,taskness
+trial,none,NA,PxF_v,NA,PxF_v,subset,taskness
+trial,none,NA,PxN_v,NA,PxN_v,subset,taskness
+trial,none,NA,UxH_v,NA,UxH_v,subset,taskness
+trial,none,NA,UxF_v,NA,UxF_v,subset,taskness
+trial,none,NA,UxN_v,NA,UxN_v,subset,taskness
