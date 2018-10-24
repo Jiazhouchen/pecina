@@ -84,6 +84,25 @@ prep.son1<-function(son1_single = NULL,
   son1_single$ExpRat_Miss<-FALSE
   son1_single$ExpRat_Miss[which(is.na(son1_single$ExpRat))]<-TRUE
   
+  son1_single$true_plac<- (-1)
+  son1_single$true_plac[son1_single$plac_ctrl & son1_single$signal_baseline]<-1
+  
+  son1_single$Inf_FbOnly<- (0)
+  son1_single$Inf_FbOnly[son1_single$plac_ctrl & son1_single$signal_baseline]<-1
+  son1_single$Inf_FbOnly[(!son1_single$plac_ctrl) & son1_single$signal_baseline]<- (-1)
+  
+  son1_single$Inf_NoFbOnly<- (0)
+  son1_single$Inf_NoFbOnly[son1_single$plac_ctrl & (!son1_single$signal_baseline)]<-1
+  son1_single$Inf_NoFbOnly[(!son1_single$plac_ctrl) & (!son1_single$signal_baseline)]<- (-1)
+  
+  
+  son1_single$Fb_InfOnly<- (0)
+  son1_single$Fb_InfOnly[son1_single$plac_ctrl & son1_single$signal_baseline]<-1
+  son1_single$Fb_InfOnly[son1_single$plac_ctrl & (!son1_single$signal_baseline)]<- (-1)
+  
+  son1_single$Fb_NoInfOnly<- (0)
+  son1_single$Fb_NoInfOnly[(!son1_single$plac_ctrl) & son1_single$signal_baseline]<-1
+  son1_single$Fb_NoInfOnly[(!son1_single$plac_ctrl) & (!son1_single$signal_baseline)]<- (-1)
   
   vba<-as.list(son1_single[c(!names(son1_single) %in% regualrvarinames)])
   #Add taskness variables to value
@@ -145,7 +164,14 @@ prep.son1<-function(son1_single = NULL,
                                    onset=son1_single$ImprovedOnset,
                                    duration=son1_single$ImprovedRt,
                                    run=son1_single$Run,
-                                   trial=son1_single$TrialNum))
+                                   trial=son1_single$TrialNum),
+                 wholetrial=data.frame(event="wholetrial",
+                                     onset=son1_single$InfOnset,
+                                     duration=son1_single$WillImpOnset - son1_single$InfOnset,
+                                     run=son1_single$Run,
+                                     trial=son1_single$TrialNum)
+                 
+                 )
   for (i in 1:length(finalist)) {
     if (i==1) {ktz<-finalist[[i]]} else {
       ktz<-rbind(ktz,finalist[[i]])}
@@ -159,7 +185,10 @@ prep.son1<-function(son1_single = NULL,
 prep.confram<-function(singlesub=NULL) {
   conframe<-rbind(singlesub[[1]],singlesub[[2]])
   
-  conframe$Rating_w_bias[is.na(conframe$Rating_w_bias)]<-0
+  #For Rating bias model no use;
+  #conframe$Rating_w_bias[is.na(conframe$Rating_w_bias)]<-0
+  
+  #For 6 regs model
   #PxH
   conframe$PxH<-FALSE
   conframe$PxH[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<-TRUE
@@ -178,6 +207,38 @@ prep.confram<-function(singlesub=NULL) {
   #UxN
   conframe$UxN<-FALSE
   conframe$UxN[conframe$Context=="Unpleasant" & conframe$Emotion=="Neutral"]<-TRUE
+  
+  #For the GM Models:
+  conframe$EmotionReg<- 0
+  conframe$EmotionReg[conframe$Emotion=="Happy"]<- 1
+  conframe$EmotionReg[conframe$Emotion=="Neutral"]<- (-1)
+  
+  conframe$EmotionHappy<- 0
+  conframe$EmotionHappy[conframe$Emotion=="Happy"]<- 1
+  
+  conframe$EmotionFearful<- 0
+  conframe$EmotionFearful[conframe$Emotion=="Fearful"]<- 1
+  
+  conframe$ContextReg<- 0
+  conframe$ContextReg[conframe$Context=="Pleasant"]<- 1
+  conframe$ContextReg[conframe$Context=="Unpleasant"]<- (-1)
+  
+  conframe$ContextHappy<- 0
+  conframe$ContextHappy[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<- 1
+  conframe$ContextHappy[conframe$Context=="Unpleasant" & conframe$Emotion=="Happy"]<- (-1)
+  
+  conframe$ContextFearful<- 0
+  conframe$ContextFearful[conframe$Context=="Pleasant" & conframe$Emotion=="Fearful"]<- 1
+  conframe$ContextFearful[conframe$Context=="Unpleasant" & conframe$Emotion=="Fearful"]<- (-1)
+  
+  conframe$Congruent<-0
+  conframe$Congruent[conframe$Context=="Unpleasant" & conframe$Emotion=="Fearful"]<- 1
+  conframe$Congruent[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<- 1
+  
+  conframe$Incongruent<-0
+  conframe$Incongruent[conframe$Context=="Unpleasant" & conframe$Emotion=="Happy"]<- 1
+  conframe$Incongruent[conframe$Context=="Pleasant" & conframe$Emotion=="Fearful"]<- 1
+
   
   finalist<-list(trial=data.frame(event="trial",
                                   onset=conframe$ContextOnset,
@@ -201,12 +262,14 @@ prep.confram<-function(singlesub=NULL) {
             UxH=conframe$UxH,
             UxF=conframe$UxF,
             UxN=conframe$UxN,
-            PxH_v=as.numeric(conframe$PxH) * conframe$Rating_w_bias,
-            PxF_v=as.numeric(conframe$PxF) * conframe$Rating_w_bias,
-            PxN_v=as.numeric(conframe$PxN) * conframe$Rating_w_bias,
-            UxH_v=as.numeric(conframe$UxH) * conframe$Rating_w_bias,
-            UxF_v=as.numeric(conframe$UxF) * conframe$Rating_w_bias,
-            UxN_v=as.numeric(conframe$UxN) * conframe$Rating_w_bias)
+            Emotion=conframe$EmotionReg,
+            EmotionHappy=conframe$EmotionHappy,
+            EmotionFearful=conframe$EmotionFearful,
+            Context=conframe$ContextReg,
+            ContextHappy=conframe$ContextHappy,
+            ContextFearful=conframe$ContextFearful,
+            Congruent=conframe$Congruent,
+            Incongruent=conframe$Incongruent)
   
   
   output<-list(event.list=finalist,output.df=conframe,value=vba)

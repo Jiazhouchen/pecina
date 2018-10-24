@@ -17,7 +17,7 @@ fsl_2_sys_env()
 #boxdir<-findbox()
 boxdir <- "/Volumes/bek/Box Sync"
 #Setting default options
-argu<-as.environment(list(nprocess=12,onlyrun=NULL,proc_id_subs=NULL,regtype=".1D",ifnuisa=FALSE,adaptive_gfeat=TRUE,
+argu<-as.environment(list(nprocess=4,onlyrun=NULL,proc_id_subs=NULL,regtype=".1D",ifnuisa=FALSE,adaptive_gfeat=TRUE,
                           hig_lvl_path_filter=NULL,cluster_thresh = 3,whichttest = c("paired","onesample"),
                           group_id_sep=c('Nalt','Plac'),graphic.threshold=0.95,forcereg=FALSE,ifoverwrite_secondlvl=F,
                           cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
@@ -31,9 +31,10 @@ argu<-as.environment(list(nprocess=12,onlyrun=NULL,proc_id_subs=NULL,regtype=".1
 
 #Which model to run:
 M_base=FALSE
-M_RTConv=FALSE
-M_Value=TRUE
-
+M_Value=FALSE
+M_GM<-FALSE
+M_GMa<-TRUE
+M_inC<-FALSE
 #Differentiate argument for different models here:
 if (M_base) {
   argu$gridpath<-"grid_sc.csv"
@@ -63,55 +64,41 @@ if (M_Value) {
                          "UxN_v")
   argu$ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_cf3_template_R.fsf"
 }
-
+if (M_GM) {
+  argu$gridpath<-"grid_sc_gm.csv"
+  argu$model.name="cf_gm"
+  argu$model.varinames=c("Emotion",        
+                         "Context",
+                         "ContextHappy",
+                         "ContextFearful",
+                         "Trial")
+  argu$ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_cf_gm_template_R.fsf"
+}
+if (M_GMa) { #none ordinal
+  argu$gridpath<-"grid_sc_gma.csv"
+  argu$model.name="cf_gma"
+  argu$model.varinames=c("EmotionHappy",
+                         "EmotionFearful",
+                         "Context",
+                         "ContextHappy",
+                         "ContextFearful",
+                         "Trial")
+  argu$ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_cf_gma_template_R.fsf"
+}
+if (M_inC) {
+  argu$gridpath<-"grid_sc_inc.csv"
+  argu$model.name="cf_inC"
+  argu$model.varinames=c("Congruent",        
+                         "Incongruent",
+                         "Trial")
+  argu$ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_cf_inc_template_R.fsf"
+}
 #Get behavioral data
 datalist<-proc_behav_cf(boxdir = boxdir,fmriproc = T)
-CF_outscan<-lapply(proc_behav_cf(boxdir = boxdir,behav.list = T,inscan = F),proc_outscan_cf)
-CF_P_outscan<-lapply(proc_behav_cf(boxdir = boxdir,behav.list = T,inscan = F), genProbability, 
-                     condition=c("Condition"),response=c("ConditionResposne"),missresp="")
-CF_P_outscan_ALL<-do.call(rbind,CF_P_outscan)
-CF_P_pos<-CF_P_outscan_ALL[CF_P_outscan_ALL$resp=="7&",]
-CF_prc2<-lapply(datalist, function(xz) {
-  xz$singlesub->xj
-  ID<-xz$singlesub$ID_CON
-  ID<-gsub("_Nalt","",gsub("_Plac","",ID))
-  if (length(xj)>2) {
-  for (xi in 1:2) {
-    x<-xj[[xi]]
-    emobu<-x$Emotion
-    x$Emotion<-plyr::mapvalues(x$Emotion,from = c("Happy","Neutral","Fearful"),to = c("positive","neutral","negative"))
-    x$Rating_w_bias<-NA
-    x$Rating<-NA
-    x$Rating[x$FaceResponseText=='Positive'] <-1
-    x$Rating[x$FaceResponseText=='Negative'] <-0
-    for (emo in unique(CF_P_pos$Condition)) {
-      if (length(CF_P_pos$p[CF_P_pos$ID==ID & CF_P_pos$Condition==emo])>0) {
-        x$Rating_w_bias[which(tolower(x$Emotion)==emo)]<-as.numeric(as.character(x$Rating[which(tolower(x$Emotion)==emo)])) - CF_P_pos$p[CF_P_pos$ID==ID & CF_P_pos$Condition==emo]
-      }
-    }
-    emobu->x$Emotion
-    x->xj[[xi]]
-      if (all(is.na(x$Rating_w_bias))){noscore<-T}else {noscore<-F}
-  } 
-  }else {noscore<-T
-      xj<-NULL}
-  
-  if (noscore) {return(NULL)} else {
-    xz$singlesub<-xj
-    return(xz)}
-    # else {
-    #   t<-sample(x = CF_P_pos$p[CF_P_pos$Condition==emo],size = 1)
-    #   x$Rating_w_bias[which(tolower(x$Emotion)==emo)]<-as.numeric(as.character(x$Rating[which(tolower(x$Emotion)==emo)])) - t
-    # }
-  
-  
-})
 
-CF_prc2<-cleanuplist(CF_prc2)
 
-#stop()
 #Run fsl_pipe
 fslpipe::fsl_pipe(argu=argu,
          prep.call.func="prep.confram", #This should be a character string that's the name of the prep proc function
-         prep.call.allsub=CF_prc2 #List of ID list of arguments for prep.call.
+         prep.call.allsub=datalist #List of ID list of arguments for prep.call.
 )
