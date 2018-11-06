@@ -32,8 +32,8 @@ argu<-as.environment(list(nprocess=4,onlyrun=NULL,proc_id_subs=NULL,regtype=".1D
 #Which model to run:
 M_base=FALSE
 M_Value=FALSE
-M_GM<-FALSE
-M_GMa<-TRUE
+M_GM<-TRUE
+M_GMa<-FALSE
 M_inC<-FALSE
 #Differentiate argument for different models here:
 if (M_base) {
@@ -102,3 +102,68 @@ fslpipe::fsl_pipe(argu=argu,
          prep.call.func="prep.confram", #This should be a character string that's the name of the prep proc function
          prep.call.allsub=datalist #List of ID list of arguments for prep.call.
 )
+
+
+if(F){
+  
+  roi_extraction_pairedtmask<-roi_getvalue(rootdir=argu$ssub_outputroot,grproot=argu$glvl_outputroot,modelname=argu$model.name,
+                               basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
+                               roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
+  roi_extraction_placmask<-roi_getvalue(rootdir=argu$ssub_outputroot,grproot=argu$glvl_outputroot,modelname=argu$model.name,grp_identif="Plac",
+                                           basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
+                                           roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
+  roi_extraction_naltmask<-roi_getvalue(rootdir=argu$ssub_outputroot,grproot=argu$glvl_outputroot,modelname=argu$model.name,grp_identif="Nalt",
+                                        basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
+                                        roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
+    
+  library(fslpipe)
+  rootdir=argu$ssub_outputroot
+  grproot=argu$glvl_outputroot
+  modelname=argu$model.name
+  grp_identif="Plac"
+  raw_avfeat<-system(paste0("find ",file.path(rootdir,modelname,"*/average.gfeat")," -iname '*.feat' -maxdepth 2 -mindepth 1 -type d"),intern = T)
+  fsl_2_sys_env()
+  strsplit(raw_avfeat,split = "/") ->raw.split
+  df.ex<-data.frame(ID=unlist(lapply(raw.split,function(x) {
+    x[grep("average.gfeat",x)-1]
+  })),
+  COPENUM=unlist(lapply(raw.split,function(x) {
+    x[grep("average.gfeat",x)+1]
+  })),
+  PATH=file.path(raw_avfeat,"stats","cope1.nii.gz")
+  )
+  df.ex$COPENUM<-substr(df.ex$COPENUM,start=regexpr("[0-9]",df.ex$COPENUM),stop = regexpr(".feat",df.ex$COPENUM)-1)
+  if(!is.na(grp_identif)){
+    if(length(grp_identif)>1){stop("Function do not want to handle more than one grp_identifier at a time, do a lapply or loop.")}
+    truerootdir<-file.path(grproot,modelname,grp_identif)
+  } else {truerootdir<-file.path(grproot,modelname)}
+  copenum=2
+  df.idx<-df.ex[df.ex$COPENUM==copenum,]
+  featdir<-list.files(path = truerootdir,pattern = paste0("cope",copenum,".*_randomize"),full.names = T)
+  featdir<-featdir[-grep(".jpeg",featdir)]
+  cmindx<-read.csv(file.path(featdir,"index.csv"),stringsAsFactors = F)
+  
+  clx<-cmindx$`index`
+    concatimg<-list.files(pattern = ".*4D.nii.gz$",path = featdir,full.names = T)
+    if(any(grepl("concat4D.nii.gz",concatimg))) {concatimg<-concatimg[grepl("concat4D.nii.gz",concatimg)]
+    }else if(length(concatimg)<1 | grepl("PairedT",concatimg) | !is.na(grp_identif)){
+      concatimg<-file.path(featdir,"concat4D.nii.gz")
+      concatcmd<-paste(sep=" ","fslmerge -t",concatimg,paste(df.idx$PATH,collapse = " "))
+      system(concatcmd,intern = F)
+    }
+    cmindx$maskpath<-paste(featdir,"Clusters",cmindx$PATH,sep = .Platform$file.sep)
+    roivalues<-as.data.frame(do.call(cbind,lapply(clx, function(clz){
+      #print(clz)
+      # roivalue<-sapply(1:length(df.idx$ID), function(iz){
+      #   print(iz)
+      # cmdx<-paste(sep=" ","fslstats",as.character(df.idx$PATH[iz]),
+      #            "-k",cmindx$maskpath[cmindx$`Cluster Index`==clz],"-M")
+      # system(cmdx,intern = T)})
+      #Use fslstat timeserires to calculate;
+      cmdx<-paste(sep=" ","fslstats -t",concatimg,
+                  "-k",cmindx$maskpath[cmindx$index==clz],"-M")
+      system(cmdx,intern = T)
+    })))
+    names(roivalues)<-cmindx$name
+    roivalues$ID<-as.character(df.idx$ID)
+    

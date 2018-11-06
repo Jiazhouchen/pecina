@@ -18,11 +18,12 @@ prep.son1<-function(son1_single = NULL,
                                        'WillImpOnset','WillImpRespBin','WillImpRespNum','WillImpRespText',
                                        'WillImpRt','administration','subject_id','plac_ctrl','reinf_cont','plac','plac_ctrl_r','reinf_cont_r'),
                     adminfilter=1) {
-  if (is.null(son1_all)) {stop("NO INPUT")}
+  if (is.null(son1_single)) {stop("NO INPUT")}
   #print("This is current Ver.")
-  son1_single<-son1_single[which(son1_single$administration==adminfilter),]
-  vba<-as.list(son1_single[c(!names(son1_all) %in% regualrvarinames)])
-  vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
+  if(!is.null(adminfilter)){
+  son1_single<-son1_single[which(son1_single$administration==adminfilter),]}
+  vba<-as.list(son1_single[c(!names(son1_single) %in% regualrvarinames)])
+  #vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
   son1_single$plac_ctrl <- NA
   son1_single$plac_ctrl[son1_single$InfusionNum==1 | son1_single$InfusionNum==2] <- TRUE
   son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
@@ -44,6 +45,11 @@ prep.son1<-function(son1_single = NULL,
   son1_single$signal_baseline_bin[which(son1_single$signal_baseline)]<-1
   son1_single$signal_baseline_bin[which(!son1_single$signal_baseline)]<-(-1)
   
+  son1_single$contingency<-0
+  son1_single$contingency[which(son1_single$InfusionNum %in% c("1","3"))]<-1
+  son1_single$contingency[which(son1_single$InfusionNum %in% c("2","4"))]<-(-1)
+  
+  
   son1_single$ExpRat<-NA
   son1_single$ExpRat[son1_single$WillImpRespText=="Yes"] <- TRUE
   son1_single$ExpRat[son1_single$WillImpRespText=="No"] <- FALSE
@@ -57,7 +63,6 @@ prep.son1<-function(son1_single = NULL,
   son1_single$ExpRat_bin[which(son1_single$ExpRat)]<-1
   son1_single$ExpRat_bin[which(!son1_single$ExpRat)]<-(-1)
 
-  
   son1_single$MoodRat<-NA
   son1_single$MoodRat[son1_single$ImprovedRespText=="Yes"] <- TRUE
   son1_single$MoodRat[son1_single$ImprovedRespText=="No"] <- FALSE
@@ -84,8 +89,11 @@ prep.son1<-function(son1_single = NULL,
   son1_single$ExpRat_Miss<-FALSE
   son1_single$ExpRat_Miss[which(is.na(son1_single$ExpRat))]<-TRUE
   
-  son1_single$true_plac<- (-1)
+  son1_single$true_plac<- (0)
   son1_single$true_plac[son1_single$plac_ctrl & son1_single$signal_baseline]<-1
+  
+  son1_single$true_plac2<- (0)
+  son1_single$true_plac2[son1_single$plac_ctrl & son1_single$contingency==1]<-1
   
   son1_single$Inf_FbOnly<- (0)
   son1_single$Inf_FbOnly[son1_single$plac_ctrl & son1_single$signal_baseline]<-1
@@ -124,15 +132,16 @@ prep.son1<-function(son1_single = NULL,
   
   #vba$ExpRat_bin<-plyr::mapvalues(x = son1_single$WillImpRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
   #vba$MoodRat_bin<-plyr::mapvalues(x = son1_single$ImprovedRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
+  
   #Safe guard this from NaNs:
-  son1_single$WillImpRt[which(is.na(son1_single$WillImpRt))]<-2
-  son1_single$ImprovedRt[which(is.na(son1_single$ImprovedRt))]<-2
+  son1_single$WillImpRt[which(is.na(son1_single$WillImpRt))]<-0
+  son1_single$ImprovedRt[which(is.na(son1_single$ImprovedRt))]<-0
   
   
   
   finalist<-list(infusion=data.frame(event="infusion",
                                      onset=son1_single$InfOnset,
-                                     duration=son1_single$WillImpOnset - son1_single$InfOnset,
+                                     duration=4, #Since it's designed for 4 seconds let's just do 4 seconds
                                      run=son1_single$Run,
                                      trial=son1_single$TrialNum),
                  feedback=data.frame(event="feedback",
@@ -169,8 +178,12 @@ prep.son1<-function(son1_single = NULL,
                                      onset=son1_single$InfOnset,
                                      duration=son1_single$WillImpOnset - son1_single$InfOnset,
                                      run=son1_single$Run,
-                                     trial=son1_single$TrialNum)
-                 
+                                     trial=son1_single$TrialNum),
+                 feedback_bl=data.frame(event="feedback_bl",
+                                       onset=son1_single$Feed1Onset,
+                                       duration=son1_single$Feed2Onset - son1_single$Feed1Onset,
+                                       run=son1_single$Run,
+                                       trial=son1_single$TrialNum)
                  )
   for (i in 1:length(finalist)) {
     if (i==1) {ktz<-finalist[[i]]} else {
