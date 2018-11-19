@@ -12,7 +12,7 @@ singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=4,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
+argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
                           group_id_sep=c('Nalt','Plac'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
@@ -45,8 +45,8 @@ if (alignment2) {
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment2.csv"
 }
 if (alignment3) {
-  argu$model.name="alignment3a"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3a.csv"
+    argu$model.name="alignment3c_light"
+    argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c_light.csv"
 }
 if (alignment4) {
   argu$model.name="alignment4"

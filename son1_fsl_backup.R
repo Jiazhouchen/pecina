@@ -13,7 +13,7 @@ source('pecina_R_utility_function.R')
 #Setting up FSL global enviroment variables in case we are using RStudio
 fsl_2_sys_env()
 
-singlesub<-F
+singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
@@ -21,7 +21,7 @@ argu<-as.environment(list(nprocess=8,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/b
                           regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
                           proc_id_subs="_a",regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
-                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",centerscaleall=FALSE,
+                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
                           glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
                           templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
                           ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_ssfeat_general_adaptive_template_R.fsf",
@@ -37,9 +37,7 @@ argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabl
 
 alignment1<-F
 alignment2<-F
-alignment3<-F
-alignment3c2<-T
-alignment3c3<-F
+alignment3<-T
 alignment4<-F
 alignment5<-F
 alignment6<-F
@@ -51,13 +49,9 @@ if (alignment2) {
   argu$model.name="alignment2"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment2.csv"
 }
-if (alignment3c2) {
-  argu$model.name="alignment3c_light"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c_light.csv"
-}
-if (alignment3c3) {
-  argu$model.name="alignment3c3"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c3.csv"
+if (alignment3) {
+  argu$model.name="alignment3c"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c.csv"
 }
 if (alignment4) {
   argu$model.name="alignment4"
@@ -80,9 +74,7 @@ if (alignment6) {
 
 boxdir <- "/Volumes/bek/Box Sync"
 
-son_all<-as.environment(list())
-load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son_behav.rdata"),envir = son_all)
-son1_all<-son_all$bothSONs$SON1$df
+son1_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son1_all.csv"))
 #Split them into mulitiple participants
 son1_split<-split(son1_all,son1_all$Participant)
 son1_rework<-lapply(names(son1_split),function(x) {
@@ -90,7 +82,7 @@ son1_rework<-lapply(names(son1_split),function(x) {
   return(list(son1_single=y))
 })
 names(son1_rework)<-names(son1_split)
-#son1_split$SON1_018->son1_single
+
 if(singlesub){
   son1_rework<-son1_rework["SON1_018"]
 }
@@ -101,11 +93,7 @@ fsl_pipe(
     prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
     prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
     )
-#HEATMAP:
-if(F){
-load(file.path(argu$ssub_outputroot,argu$model.name,"design.rdata"))
-fslpipe::make_heatmap_with_design( allsub.design$SON1_018)
-}
+
 ##ROI
 if(F) {
   alignment1_roi<-roi_getvalue(rootdir=argu$ssub_outputroot,grproot=argu$glvl_outputroot,modelname="alignment1_evtmax",

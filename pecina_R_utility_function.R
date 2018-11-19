@@ -21,7 +21,8 @@ prep.son1<-function(son1_single = NULL,
   if (is.null(son1_single)) {stop("NO INPUT")}
   #print("This is current Ver.")
   if(!is.null(adminfilter)){
-  son1_single<-son1_single[which(son1_single$administration==adminfilter),]}
+  son1_single<-son1_single[which(son1_single$administration==adminfilter),]
+  }
   vba<-as.list(son1_single[c(!names(son1_single) %in% regualrvarinames)])
   #vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
   son1_single$plac_ctrl <- NA
@@ -92,10 +93,19 @@ prep.son1<-function(son1_single = NULL,
   son1_single$true_plac<- (0)
   son1_single$true_plac[son1_single$plac_ctrl & son1_single$signal_baseline]<-1
   
-  son1_single$true_plac2<- (0)
-  son1_single$true_plac2[son1_single$plac_ctrl & son1_single$contingency==1]<-1
+  son1_single$plac_highreinf<- (0)
+  son1_single$plac_highreinf[son1_single$plac_ctrl & son1_single$contingency==1]<-1
+  son1_single$plac_highreinf[!son1_single$plac_ctrl & son1_single$contingency==1]<-(-1)
   
-  son1_single$Inf_FbOnly<- (0)
+  son1_single$reinf_withplac<- (0)
+  son1_single$reinf_withplac[son1_single$plac_ctrl & son1_single$contingency==1]<-1
+  son1_single$reinf_withplac[son1_single$plac_ctrl & !son1_single$contingency==1]<-(-1)
+  
+  son1_single$plac_contin<- (0)
+  son1_single$plac_contin<-(son1_single$plac_ctrl_bin*son1_single$contingency)*(-1)
+  
+  
+  son1_single$plac_continson1_single$Inf_FbOnly<- (0)
   son1_single$Inf_FbOnly[son1_single$plac_ctrl & son1_single$signal_baseline]<-1
   son1_single$Inf_FbOnly[(!son1_single$plac_ctrl) & son1_single$signal_baseline]<- (-1)
   
