@@ -72,11 +72,10 @@ if (alignment6) {
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment6.csv"
 }
 
-###################
-##Official Start:##
+###########Official Start:###########
 #Supposedly you shouldn't need to change anything down below:
 #If you are just switching models
-###################
+
 
 boxdir <- "/Volumes/bek/Box Sync"
 
@@ -101,12 +100,20 @@ fsl_pipe(
     prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
     prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
     )
-#HEATMAP:
+
+
+
+
+
+#########Additional Functions##########
+
+
+####HEAT HEATMAP: #####
 if(F){
 load(file.path(argu$ssub_outputroot,argu$model.name,"design.rdata"))
 fslpipe::make_heatmap_with_design( allsub.design$SON1_018)
 }
-##ROI
+####ROI Extraction#####
 if(F) {
   alignment1_roi<-roi_getvalue(rootdir=argu$ssub_outputroot,grproot=argu$glvl_outputroot,modelname="alignment1_evtmax",
                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
