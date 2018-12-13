@@ -12,11 +12,11 @@ singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
-                          regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
-                          group_id_sep=c('Nalt','Plac'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
+argu<-as.environment(list(nprocess=4,onlyrun=5,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
+                          regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz", #c(a,b) = b>a
+                          group_id_sep=c('Plac','Nalt'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
-                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",whichttest = c("paired","onesample"),
+                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",whichttest = c("paired"),
                           glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",
                           templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
                           ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_ssfeat_general_adaptive_template_R.fsf",
@@ -89,3 +89,29 @@ fsl_pipe(
   prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
   prep.call.allsub=son2_rework #List of ID list of arguments for prep.call.
 )
+
+
+#ROI###
+if(F){
+
+a3c_light<-fslpipe::roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",
+                                      grproot="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",
+                                      modelname="alignment3c_light",basemask = "tstat",corrp_mask="cluster-based-extent",
+                                      saveclustermap=TRUE,Version=NULL,corrmaskthreshold=0.95,saverdata = T,
+                                      roimaskthreshold=0.001, voxelnumthres=1, clustertoget=NULL,copetoget=10,maxcore=6)
+
+roidf<-a3c_light$cope_10$roivalues
+roidf$Drug<-NA
+roidf$Drug[grepl("Nalt",roidf$ID)]<-"Nalt"
+roidf$Drug[grepl("Plac",roidf$ID)]<-"Plac"
+roidf$uID<-gsub("_Plac","",gsub("_Nalt","",roidf$ID))
+roidfx<-do.call(rbind,lapply(unique(roidf$uID),function(id){
+  Naltvalue<-(as.numeric(as.character(roidf[roidf$uID==id & roidf$Drug=="Nalt","cluster_1"])))
+  Placvalue<-(as.numeric(as.character(roidf[roidf$uID==id & roidf$Drug=="Plac","cluster_1"])))
+  if(length(Naltvalue)>0 && length(Placvalue)>0) {
+    diff_beta<-Placvalue-Naltvalue
+  } else {diff_beta<-NA}
+  data.frame(ID=id, diff_beta=diff_beta)
+}))
+
+}

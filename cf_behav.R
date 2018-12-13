@@ -13,6 +13,7 @@ boxdir<-"/Volumes/bek/Box Sync"
 
 #########FUNCTIONS################
 #Base get behavioral data function:
+
 proc_behav_cf<-function(boxdir=NULL,datafolder=NULL,fmriproc=F,behav.list=F,behav.df=F,outputdir=NULL,inscan=T) {
   
   if (grepl(" ",boxdir)) {

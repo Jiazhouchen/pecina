@@ -20,6 +20,7 @@ prep.son1<-function(son1_single = NULL,
                     adminfilter=1) {
   if (is.null(son1_single)) {stop("NO INPUT")}
   #print("This is current Ver.")
+  if(is.null(son1_single$administration)){son1_single$administration<-son1_single$VisitType}
   if(!is.null(adminfilter)){
   son1_single<-son1_single[which(son1_single$administration==adminfilter),]
   }
@@ -136,8 +137,8 @@ prep.son1<-function(son1_single = NULL,
   vba$ExpRat_bin<-son1_single$ExpRat_bin
   #vba$twoLR_fixD_oneK_vt1_centerscaled<-as.numeric(scale(son1_single$twoLR_fixD_oneK_vt1,center=T))
   #vba$twoLR_fixD_oneK_PEshifted_centerscaled<-as.numeric(scale(son1_single$twoLR_fixD_oneK_PEshifted,center=T))
-  vba$oneLR_fixD_oneK_vt1_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_vt1,center=T))
-  vba$oneLR_fixD_oneK_PEshifted_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_PEshifted,center=T))
+  #vba$oneLR_fixD_oneK_vt1_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_vt1,center=T))
+  #vba$oneLR_fixD_oneK_PEshifted_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_PEshifted,center=T))
   vba$PE_congruent_centerscaled<-scale(son1_single$PE_congruent,center = T)
   
   #vba$ExpRat_bin<-plyr::mapvalues(x = son1_single$WillImpRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
