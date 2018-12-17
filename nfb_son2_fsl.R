@@ -1,8 +1,8 @@
 rm(list = ls())
 require("devtools")
-devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",force = T)
+#devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",force = F)
 library(fslpipe)
-if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
+#if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 source('pecina_R_utility_function.R')
 
 #Setting up FSL global enviroment variables in case we are using RStudio
@@ -12,7 +12,7 @@ singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=4,onlyrun=5,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
+argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz", #c(a,b) = b>a
                           group_id_sep=c('Plac','Nalt'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
@@ -30,9 +30,10 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
+Value1<-T
 alignment1<-F
 alignment2<-F
-alignment3<-T
+alignment3<-F
 alignment4<-F
 alignment5<-F
 alignment6<-F
@@ -60,7 +61,10 @@ if (alignment6) {
   argu$model.name="alignment6"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment6.csv"
 }
-
+if (Value1) {
+  argu$model.name="Value1"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
+}
 ###################
 ##Official Start:##
 #Supposedly you shouldn't need to change anything down below:
@@ -69,18 +73,24 @@ if (alignment6) {
 
 boxdir <- "/Volumes/bek/Box Sync"
 
-son2_all <- read.csv(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son2_all.csv"))
-son2_all$FULLID<-paste(son2_all$Participant,son2_all$administration,sep = "_")
+son_all<-as.environment(list())
+load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son_behav.rdata"),envir = son_all)
+son2_all<-son_all$bothSONs$SON2$df
 #Split them into mulitiple participants
-son2_split<-split(son2_all,son2_all$FULLID)
+if(is.null(argu$group_id_sep)){
+son2_split<-split(son2_all,son2_all$Participant)
+} else {
+son2_split<-split(son2_all,son2_all$FullID)
+#names(son1_split)<-gsub("_2$","_b",gsub("_1$","_a",names(son1_split)))
+}
 son2_rework<-lapply(names(son2_split),function(x) {
   son2_split[[x]]->y
   return(list(son1_single=y,adminfilter=NULL))
 })
 names(son2_rework)<-names(son2_split)
-
+#son1_split$SON1_018->son1_single
 if(singlesub){
-  son2_rework<-son2_rework["SON2_018_Plac"]
+  son2_rework<-son2_rework["SON2_018"]
 }
 
 print(names(son2_rework))

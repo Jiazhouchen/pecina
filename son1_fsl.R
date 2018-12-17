@@ -17,7 +17,7 @@ singlesub<-F
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=4,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
                           group_id_sep=c("a","b"),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
@@ -35,7 +35,8 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
-PE1<-T
+PE1<-F
+Value1<-T
 alignment1<-F
 alignment2<-F
 alignment3<-F
@@ -76,6 +77,10 @@ if (alignment6) {
 if (PE1) {
   argu$model.name="PE1"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE1.csv"
+}
+if (Value1) {
+  argu$model.name="Value1"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
 }
 
 ###########Official Start:###########
