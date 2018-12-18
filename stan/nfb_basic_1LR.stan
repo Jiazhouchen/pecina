@@ -4,16 +4,14 @@ data {
   int<lower=1> nSession [nSubject];
   int<lower=1> maxTrialN;
   int<lower=0,upper=1> SessionIndex[nSubject,2]; 
-  vector<lower=0,upper=1>[nSubject] Infusion [2,maxTrialN]; 
-  vector<lower=0,upper=1>[nSubject] Trial_Feedback [2,maxTrialN]; 
-  vector<lower=0,upper=1>[nSubject] Contingency_Feedback [2,maxTrialN]; 
-  vector<lower=0,upper=1>[nSubject] ExpRat [2,maxTrialN]; 
-  vector<lower=0,upper=1>[nSubject] MoodRat [2,maxTrialN]; 
-
-  
+  int Infusion [nSubject,2,maxTrialN]; 
+  int Trial_Feedback [nSubject,2,maxTrialN]; 
+  int Contingency_Feedback [nSubject,2,maxTrialN]; 
+  int ExpRat [nSubject,2,maxTrialN]; 
+  //int MoodRat [nSubject,2,maxTrialN]; 
   //int<lower=1,upper=4> Condition [nSubject,2,maxTrialN]; 
   int missing_choice_exp [nSubject,2,maxTrialN];
-  int missing_choice_mood [nSubject,2,maxTrialN];
+  //int missing_choice_mood [nSubject,2,maxTrialN];
   //int num_learning_rate; //add arguments here to determine how many learning rate;
 }
 
