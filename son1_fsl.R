@@ -81,6 +81,7 @@ if (PE1) {
 if (Value1) {
   argu$model.name="Value1"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
+  argu$centerscaleall=TRUE
 }
 
 ###########Official Start:###########

@@ -12,12 +12,12 @@ singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
+argu<-as.environment(list(nprocess=4,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz", #c(a,b) = b>a
-                          group_id_sep=c('Plac','Nalt'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
+                          group_id_sep=c('Nalt','Plac'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
-                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",whichttest = c("paired"),
-                          glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",
+                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",whichttest = c("paired","onesample"),
+                          glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",centerscaleall=FALSE,
                           templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
                           ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_ssfeat_general_adaptive_template_R.fsf",
                           glvl_output="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",ifoverwrite_secondlvl=FALSE,hig_lvl_path_filter=NULL,
@@ -64,6 +64,7 @@ if (alignment6) {
 if (Value1) {
   argu$model.name="Value1"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
+  argu$centerscaleall<-TRUE
 }
 ###################
 ##Official Start:##
