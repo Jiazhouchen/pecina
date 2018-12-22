@@ -89,6 +89,7 @@ if (argu_sc) {
     templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
     #If there's anyother folder within $output/$model.name that contains *.feat, please remove it from here
     hig_lvl_path_filter=NULL,
+    whichttest=c("paired"),
     graphic.threshold=0.95,
     forcereg=FALSE,
     ifoverwrite_secondlvl=F
