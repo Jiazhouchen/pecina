@@ -14,12 +14,13 @@ source('pecina_R_utility_function.R')
 fsl_2_sys_env()
 
 singlesub<-F
+runQC<-F
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
 argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
-                          group_id_sep=c("a","b"),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
+                          group_id_sep=NULL,regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
                           ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",centerscaleall=FALSE,
                           glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
@@ -35,8 +36,8 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
-PE1<-F
-Value1<-T
+PE<-T
+Value1<-F
 alignment1<-F
 alignment2<-F
 alignment3<-F
@@ -74,14 +75,19 @@ if (alignment6) {
   argu$model.name="alignment6"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment6.csv"
 }
-if (PE1) {
-  argu$model.name="PE1"
+if (PE) {
+  argu$model.name="PE1n"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE1.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
 }
 if (Value1) {
-  argu$model.name="Value1"
+  argu$model.name="Value1n"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
   argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
 }
 
 ###########Official Start:###########
@@ -89,10 +95,10 @@ if (Value1) {
 #If you are just switching models
 
 
-boxdir <- "/Volumes/bek/Box Sync"
+boxdir <- "~/Box/"
 
 son_all<-as.environment(list())
-load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son_behav.rdata"),envir = son_all)
+load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","nfb_behav.rdata"),envir = son_all)
 son1_all<-son_all$bothSONs$SON1$df
 #Split them into mulitiple participants
 if(is.null(argu$group_id_sep)){
@@ -103,7 +109,15 @@ names(son1_split)<-gsub("_2$","_b",gsub("_1$","_a",names(son1_split)))
 }
 son1_rework<-lapply(names(son1_split),function(x) {
   son1_split[[x]]->y
-  return(list(son1_single=y,adminfilter=NULL))
+  if(exists("proc_id_subs",envir = argu)){
+    if (argu$proc_id_subs=="_a"){adminifilter=1}else if (argu$proc_id_subs=="_b"){adminifilter=2}
+
+  } else {
+    adminifilter=NULL
+  }
+  return(list(son1_single=y,adminfilter=adminifilter,QC=runQC))
+
+  
 })
 names(son1_rework)<-names(son1_split)
 #son1_split$SON1_018->son1_single
@@ -133,11 +147,19 @@ if(!is.null(argu$group_id_sep) & dir.exists(file.path(argu$ssub_outputroot,argu$
 }
  
  
-fsl_pipe(
+if(runQC){
+  cfg<-cfg_info(cfgpath = argu$cfgpath)
+  info_qc<-QC_pipe(cfgpath=argu$cfgpath,QC_func="prep.son1",supplylist = son1_rework,hdtemplate=argu$templatedir,
+                   QC_auxdir="/Volumes/bek/QC_fsl",nparalle=argu$nprocess)
+  info_qc$study<-"SON1_NFB"
+} else {
+  fsl_pipe(
     argu=argu, #This is the arguments environment, each model should have a different one;
     prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
     prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
-    )
+  )
+}
+ 
 
 
 

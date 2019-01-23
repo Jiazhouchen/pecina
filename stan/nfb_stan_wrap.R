@@ -96,3 +96,26 @@ nfb_lite_betaonly_2LR_nodecay_output=stan(file='stan/nfb_lite_beta_2LR_nodecay.s
                                           include=FALSE,iter=2000,control=list(adapt_delta=0.99,stepsize=.05))
 save(nfb_lite_betaonly_2LR_nodecay_output,file = "stan/stan_output/nfb_lite_betaonly_2LR_nodecay_output.rdata")
 
+
+nfb_2Q_betaonly_1LR_nodecay_output=stan(file='stan/nfb_2Q_beta_1LR_nodecay.stan',
+                                          data=nfb_stan,verbose=FALSE,save_warmup=FALSE,
+                                          pars=c('Invert_Infus','Invert_ProbReinf','which_Infus','which_PorbReinf'),chains = 4,
+                                          include=FALSE,iter=2000,control=list(adapt_delta=0.99,stepsize=.05))
+save(nfb_2Q_betaonly_1LR_nodecay_output,file = "/Volumes/jiazhouchen/Documents/UPMC/RStation/pecina/nfb_2Q_betaonly_1LR_nodecay_output.rdata")
+
+
+nfb_1Qa_beta_1LR_nodecay=stan(file='stan/nfb_1Qa_beta_1LR_nodecay.stan',
+                                        data=nfb_stan,verbose=FALSE,save_warmup=FALSE,
+                                        pars=c('Invert_Infus','Invert_ProbReinf','which_Infus','which_PorbReinf'),chains = 4,
+                                        include=FALSE,iter=2000,control=list(adapt_delta=0.99,stepsize=.05))
+save(nfb_1Qa_beta_1LR_nodecay,file = "/Volumes/jiazhouchen/Documents/UPMC/RStation/pecina/nfb_1Qa_beta_1LR_nodecay.rdata")
+
+nfb_2Q_beta_1LR_nodecay_kappa_output=stan(file='stan/nfb_2Q_beta_1LR_nodecay_kappa.stan',
+                                        data=nfb_stan,verbose=FALSE,save_warmup=FALSE,
+                                        pars=c('Invert_Infus','Invert_ProbReinf','which_Infus','which_PorbReinf'),chains = 4,
+                                        include=FALSE,iter=2000,control=list(adapt_delta=0.99,stepsize=.05))
+save(nfb_2Q_beta_1LR_nodecay_kappa_output,file = "~/Documents/UPMC/RStation/pecina/nfb_2Q_beta_1LR_nodecay_kappa.rdata")
+
+
+
+

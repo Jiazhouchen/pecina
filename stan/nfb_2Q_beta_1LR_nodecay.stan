@@ -26,19 +26,22 @@ parameters {
   real pers_m;
   //Decay factor
   //real omega_m;
+  //Positive Bias
+  real kappa_m;
  
   real alpha_Visit;
   real beta_Visit;
   //real omega_Visit;
   //real tau_Visit;
   real pers_Visit;
+  real kappa_Visit;
   
-  real<lower=0>alpha_group_s;
-  real<lower=0>beta_group_s;
+  real<lower=0> alpha_group_s;
+  real<lower=0> beta_group_s;
   //real<lower=0> tau_group_s;
   real<lower=0> pers_group_s;
   //real<lower=0> omega_group_s;
-  
+  real<lower=0 kappa_group_s;
  
   
   vector[nSubject] alpha_subject_raw;
@@ -47,7 +50,7 @@ parameters {
   //vector[nSubject] omega_subject_raw;
   vector[nSubject] pers_subject_raw;
   //vector[nSubject] per_raw;
-  
+  vector[nSubject] kappa_subject_raw;
 
   
 } 
@@ -71,6 +74,7 @@ transformed parameters {
       beta_norm[S,Se]=beta_m + (beta_group_s * beta_subject_raw[S]) + (beta_Visit * SessionIndex[S,Se]);
       //tau_norm[S,Se]=tau_m + (tau_group_s * tau_subject_raw[S]) + (tau_Visit * SessionIndex[S,Se]);
       pers[S,Se] = pers_m + (pers_group_s * pers_subject_raw[S]) + (pers_Visit * SessionIndex[S,Se]);
+      kappa[S,Se] = kappa + (kappa_group_s * kappa_subject_raw[S]) + (kappa_Visit * SessionIndex[S,Se]);
     }
   }
   
@@ -93,12 +97,13 @@ model {
   beta_m ~ normal(0,5);
   //tau_m ~ normal(0,5);
   pers_m ~ normal(0,5);
+  kappa_m ~ normal(0,5);
   
   alpha_group_s ~ cauchy(0,1);
   beta_group_s ~ cauchy(0,1);
   //tau_group_s ~ cauchy(0,1);
   pers_group_s ~ cauchy(0,1);
-  
+  kappa_group_s ~ cauchy(0,1);
 
 
   for (s in 1:nSubject) {
@@ -118,7 +123,7 @@ model {
 
             //choice yes or no
             choice=ExpRat[s,se,t]==1;
-            choice ~ bernoulli_logit( (Q[s,se,t,which_Infus] * beta[s,se]) + (pers[s,se]*prev_choice));
+            choice ~ bernoulli_logit( ( (Q[s,se,t,which_Infus]+ kappa[s,se])  * beta[s,se]) + (pers[s,se]*prev_choice));
             prev_choice = choice? 1:-1 ; //1 if choice NO, -1 if choice YED
             //Update the value
             delta[s,se,t] = (Trial_Feedback[s,se,t]) - Q[s,se,t,which_Infus];
@@ -175,7 +180,7 @@ generated quantities {
         
             //choice yes or no
             choice = ExpRat[s,se,t]==1;
-            log_lik[s,se,t] = bernoulli_logit_lpmf(choice | ((Q[s,se,t,which_Infus] * beta[s,se]) + (pers[s]*prev_choice)));
+            log_lik[s,se,t] = bernoulli_logit_lpmf(choice | (( (Q[s,se,t,2]-Q[s,se,t,1]) * beta[s,se]) + (pers[s]*prev_choice)));
             prev_choice = choice? 1:-1 ; //1 if choice NO, -1 if choice YED
             //Update the value
             delta[s,se,t] = (Trial_Feedback[s,se,t]) - Q[s,se,t,which_Infus];

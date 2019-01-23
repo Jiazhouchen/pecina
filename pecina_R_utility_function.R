@@ -10,7 +10,7 @@ source_script_github <- function(gitscripturl) {
 }
 
 ###SON1 single sub Behavr Proc function:
-prep.son1<-function(son1_single = NULL,
+prep.son1<-function(son1_single = NULL,QC=F,
                     regualrvarinames=c('Participant','ColorSet','Feed1Onset','Feed2Onset','Feed3Onset','Feedback',
                                        'ImprovedOnset','ImprovedRespBin','ImprovedRespNum','ImprovedRespText','ImprovedRt',
                                        'InfOnset','Infusion','InfusionNum','J1Onset','J1Seconds','J2Onset','J2Seconds',
@@ -21,6 +21,19 @@ prep.son1<-function(son1_single = NULL,
   if (is.null(son1_single)) {stop("NO INPUT")}
   #print("This is current Ver.")
   if(is.null(son1_single$administration)){son1_single$administration<-son1_single$VisitType}
+  
+  if(QC){
+    son1_single$duration<-4+2+(son1_single$Jitter1/100)+10+2+(son1_single$Jitter2/100)
+    son1_single$QC_OUT<-sample(1:0,length(son1_single$TrialNum),replace = T)
+    finalist<-list(QC=data.frame(event="QC",
+                                 onset=son1_single$InfOnset,
+                                 duration=son1_single$duration,
+                                 run=son1_single$Run,
+                                 trial=son1_single$TrialNum
+                                 ))
+    finalist[["allconcat"]]<-do.call(rbind,finalist)
+    output<-list(event.list=finalist,output.df=son1_single,value=son1_single)
+  } else {
   if(!is.null(adminfilter)){
   son1_single<-son1_single[which(son1_single$administration==adminfilter),]
   }
@@ -202,6 +215,8 @@ prep.son1<-function(son1_single = NULL,
   }
   finalist[["allconcat"]]<-ktz
   output<-list(event.list=finalist,output.df=son1_single,value=vba)
+  }
+  return(output)
 }
 
 
