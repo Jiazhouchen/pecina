@@ -191,8 +191,15 @@ if(F) {
                                 modelname="alignment3b",
                                 basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.965,
                                 roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
+  value1n_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+                                grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+                                modelname="Value1n",
+                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.98,
+                                roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
   
   #Example:
+  as.numeric(as.character(value1n_roi$cope_7$roivalues$cluster_3)) #This one
+  
   df<-alignment3b_tfce0.965_roi$cope_17$roivalues
   df[c("cluster_4","ID")]
 }
