@@ -1,0 +1,4 @@
+ename,norm,normargu,valuefrom,modifier,name,style,comment,,
+trial,none,NA,Congruent,NA,Congruent,subset,taskness,,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+trial,none,NA,Incongruent,NA,Incongruent,subset,taskness,,
+trial,none,NA,trial_evt,NA,Trial,subset,taskness,,

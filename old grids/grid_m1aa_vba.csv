@@ -1,0 +1,11 @@
+ename,norm,normargu,valuefrom,modifier,name,style,comment
+infusion,none,NA,infusion_evt,NA,inf_evt,subset,taskness
+infusion,none,NA,oneLR_fixD_oneK_vt1_centerscaled,NA,inf_value,subset,taskness
+feedback,none,NA,feedback_evt,NA,fb_evt,subset,taskness
+feedback,none,NA,oneLR_fixD_oneK_PEshifted_centerscaled,ExpRat_bin,fb_PE,multiply,taskness
+ExpRat,none,NA,ExpRat_evt,NA,exprat_evt,subset,taskness
+ExpRat,none,NA,ExpRat_bin,NA,exprat,subset,taskness
+MoodRat,none,NA,MoodRat_evt,NA,moodrat_evt,subset,taskness
+MoodRat,none,NA,MoodRat_bin,NA,moodrat,subset,taskness
+ExpRat,none,NA,ExpRat_Miss,NA,exprat_miss,subset,taskness
+MoodRat,none,NA,MoodRat_Miss,NA,moodrat_miss,subset,taskness

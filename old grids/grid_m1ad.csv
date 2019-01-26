@@ -1,0 +1,9 @@
+﻿ename,norm,normargu,valuefrom,modifier,name,style,comment
+infusion,none,NA,infusion_evt,NA,inf_evt,subset,taskness
+ExpRat,none,NA,plac_ctrl_bin,NA,inf_noinf_expalign,subset,taskness
+feedback,none,NA,feedback_evt,NA,fb_evt,subset,taskness
+MoodRat,none,NA,signal_baseline_bin,NA,fb_nofb_moodalign,subset,taskness
+ExpRat,none,NA,ExpRat_evt,NA,exprat_evt,subset,taskness
+ExpRat,none,NA,ExpRat_bin,NA,exprat,subset,taskness
+MoodRat,none,NA,MoodRat_evt,NA,moodrat_evt,subset,taskness
+MoodRat,none,NA,MoodRat_bin,NA,moodrat,subset,taskness

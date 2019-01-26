@@ -1,0 +1,5 @@
+﻿ename,norm,normargu,valuefrom,modifier,name,style,comment
+infusion,none,NA,infusion_evt,NA,inf_evt,subset,taskness
+infusion,none,NA,oneLR_fixD_oneK_vt1,NA,inf_value,subset,taskness
+feedback_up,none,NA,feedback_up_evt,NA,fb_evt,subset,taskness
+feedback_up,none,NA,oneLR_fixD_oneK_PEshifted,NA,fb_PE,subset,taskness

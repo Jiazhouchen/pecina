@@ -1,0 +1,6 @@
+ename,norm,normargu,valuefrom,modifier,name,style,comment
+trial,none,NA,Emotion,NA,Emotion,subset,taskness
+trial,none,NA,Context,NA,Context,subset,taskness
+trial,none,NA,ContextHappy,NA,ContextHappy,subset,taskness
+trial,none,NA,ContextFearful,NA,ContextFearful,subset,taskness
+trial,none,NA,trial_evt,NA,Trial,subset,taskness
