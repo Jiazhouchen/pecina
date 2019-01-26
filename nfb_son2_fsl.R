@@ -12,7 +12,7 @@ singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=4,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
+argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz", #c(a,b) = b>a
                           group_id_sep=c('Nalt','Plac'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
@@ -62,9 +62,10 @@ if (alignment6) {
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment6.csv"
 }
 if (Value1) {
-  argu$model.name="Value1"
+  argu$model.name="Value1n"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
-  argu$centerscaleall<-TRUE
+  argu$centerscaleall=TRUE
+  argu$adminfilter=NULL
 }
 ###################
 ##Official Start:##
@@ -72,10 +73,10 @@ if (Value1) {
 #If you are just switching models
 ###################
 
-boxdir <- "/Volumes/bek/Box Sync"
+boxdir <- "~/Box/"
 
 son_all<-as.environment(list())
-load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","son_behav.rdata"),envir = son_all)
+load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","nfb_behav.rdata"),envir = son_all)
 son2_all<-son_all$bothSONs$SON2$df
 #Split them into mulitiple participants
 if(is.null(argu$group_id_sep)){

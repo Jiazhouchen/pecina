@@ -36,9 +36,9 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
-PE<-T
+PE<-F
 Value1<-F
-alignment1<-F
+alignment1<-T
 alignment2<-F
 alignment3<-F
 alignment3c2<-F
@@ -48,8 +48,11 @@ alignment5<-F
 alignment6<-F
 
 if (alignment1) {
-  argu$model.name="alignment1_evtmax"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment1.csv"
+  argu$model.name="alignment1ar"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment1ar.csv"
+   argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
 }
 if (alignment2) {
   argu$model.name="alignment2"
@@ -198,9 +201,10 @@ if(F) {
                                 roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
   
   #Example:
-  as.numeric(as.character(value1n_roi$cope_7$roivalues$cluster_3)) #This one
+  df<-value1n_roi$cope_7$roivalues #take the output, cope 7, 
+  #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
+  df$FullID<-paste0(df$ID,"_1") #make full ID
+  df1_admin1_wroi<-merge(df1_admin1,df,by = "FullID")
   
-  df<-alignment3b_tfce0.965_roi$cope_17$roivalues
-  df[c("cluster_4","ID")]
 }
 
