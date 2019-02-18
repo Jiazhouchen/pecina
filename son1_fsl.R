@@ -5,7 +5,7 @@
 #Check required packages:
 rm(list = ls())
 require("devtools")
-if("fslpipe" %in% installed.packages()){"GREAT, FSLPIPE PACK IS INSTALLED"}else{devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R")}
+devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",upgrade = "ask",force = F)
 library(fslpipe)
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 source('pecina_R_utility_function.R')
@@ -36,9 +36,13 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
+Vt_PE_Plac<-F
 PE<-F
-Value1<-F
-alignment1<-T
+PE_abs<-F
+Value1<-T
+LRPE<-F
+LRPE_lite<-F
+alignment1<-F
 alignment2<-F
 alignment3<-F
 alignment3c2<-F
@@ -47,37 +51,7 @@ alignment4<-F
 alignment5<-F
 alignment6<-F
 
-if (alignment1) {
-  argu$model.name="alignment1ar"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment1ar.csv"
-   argu$centerscaleall=TRUE
-  argu$proc_id_subs="_a"
-  argu$adminfilter=1
-}
-if (alignment2) {
-  argu$model.name="alignment2"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment2.csv"
-}
-if (alignment3c2) {
-  argu$model.name="alignment3c_light"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c_light.csv"
-}
-if (alignment3c3) {
-  argu$model.name="alignment3c3"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c3.csv"
-}
-if (alignment4) {
-  argu$model.name="alignment4"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment4.csv"
-}
-if (alignment5) {
-  argu$model.name="alignment5"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment5.csv"
-}
-if (alignment6) {
-  argu$model.name="alignment6"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment6.csv"
-}
+
 if (PE) {
   argu$model.name="PE1n"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE1.csv"
@@ -85,9 +59,41 @@ if (PE) {
   argu$proc_id_subs="_a"
   argu$adminfilter=1
 }
+
+if (PE_abs) {
+  argu$model.name="PE_abs"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE_abs.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
 if (Value1) {
   argu$model.name="Value1n"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(LRPE){
+  argu$model.name="LRPE"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(LRPE_lite){
+  argu$model.name="LRPE_lite"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe_lite.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+if(Vt_PE_Plac){
+  argu$model.name="Vt_PE_Plac"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_value_pe_plac.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
@@ -197,7 +203,7 @@ if(F) {
   value1n_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
                                 grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
                                 modelname="Value1n",
-                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.98,
+                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
                                 roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
   
   #Example:

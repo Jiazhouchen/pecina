@@ -136,6 +136,9 @@ prep.son1<-function(son1_single = NULL,QC=F,
   son1_single$Fb_NoInfOnly[(!son1_single$plac_ctrl) & son1_single$signal_baseline]<-1
   son1_single$Fb_NoInfOnly[(!son1_single$plac_ctrl) & (!son1_single$signal_baseline)]<- (-1)
   
+  son1_single$LRPE<- as.numeric(as.character(son1_single$oneLR_fixD_oneK_LR_1)) * as.numeric(as.character(son1_single$oneLR_fixD_oneK_PE))
+  son1_single$oneLR_fixD_oneK_PE_abs<-abs(son1_single$oneLR_fixD_oneK_PE)
+  son1_single$oneLR_fixD_oneK_PE_abs_neg<-abs(son1_single$oneLR_fixD_oneK_PE)
   vba<-as.list(son1_single[c(!names(son1_single) %in% regualrvarinames)])
   #Add taskness variables to value
   vba$plac_ctrl<-son1_single$plac_ctrl

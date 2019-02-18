@@ -30,13 +30,15 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
-Value1<-T
+Value1<-F
 alignment1<-F
 alignment2<-F
 alignment3<-F
 alignment4<-F
 alignment5<-F
 alignment6<-F
+LRPE<-T
+
 if (alignment1) {
   argu$model.name="alignment1_evtmax"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment1.csv"
@@ -66,6 +68,11 @@ if (Value1) {
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
   argu$centerscaleall=TRUE
   argu$adminfilter=NULL
+}
+if(LRPE){
+  argu$model.name="LRPE"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe.csv"
+  argu$centerscaleall=TRUE
 }
 ###################
 ##Official Start:##
@@ -111,6 +118,12 @@ a3c_light<-fslpipe::roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa2/nf
                                       modelname="alignment3c_light",basemask = "tstat",corrp_mask="cluster-based-extent",
                                       saveclustermap=TRUE,Version=NULL,corrmaskthreshold=0.95,saverdata = T,
                                       roimaskthreshold=0.001, voxelnumthres=1, clustertoget=NULL,copetoget=10,maxcore=6)
+
+value1n_roi<-fslpipe::roi_getvalue(rootdir=argu$ssub_outputroot,grproot = argu$glvl_outputroot,grp_identif = "Plac",
+                                   modelname="Value1n",saverdata = T,
+                                   basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
+                                   roimaskthreshold=0.001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
+
 
 roidf<-a3c_light$cope_10$roivalues
 roidf$Drug<-NA

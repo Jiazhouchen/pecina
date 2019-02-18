@@ -1,3 +1,39 @@
+
+if (alignment1) {
+  argu$model.name="alignment1ar"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment1ar.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+if (alignment2) {
+  argu$model.name="alignment2"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment2.csv"
+}
+if (alignment3c2) {
+  argu$model.name="alignment3c_light"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c_light.csv"
+}
+if (alignment3c3) {
+  argu$model.name="alignment3c3"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c3.csv"
+}
+if (alignment4) {
+  argu$model.name="alignment4"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment4.csv"
+}
+if (alignment5) {
+  argu$model.name="alignment5"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment5.csv"
+}
+if (alignment6) {
+  argu$model.name="alignment6"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment6.csv"
+}
+
+
+
+
 if (F){
   if (model2) {
     model2<-as.environment(list(
@@ -1064,5 +1100,7 @@ if (TP) {
   argu$ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_nfb_TP_usedby_R.fsf"
 }
 }
+
+
 
 
