@@ -47,6 +47,7 @@ alignment2<-F
 alignment3<-F
 alignment3c2<-F
 alignment3c3<-F
+alignment3cx<-T
 alignment4<-F
 alignment5<-F
 alignment6<-F
@@ -99,6 +100,13 @@ if(Vt_PE_Plac){
   argu$adminfilter=1
 }
 
+if(alignment3cx){
+  argu$model.name="alignment3cx"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
 ###########Official Start:###########
 #Supposedly you shouldn't need to change anything down below:
 #If you are just switching models
