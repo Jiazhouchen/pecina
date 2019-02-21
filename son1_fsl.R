@@ -39,7 +39,8 @@ argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabl
 Vt_PE_Plac<-F
 PE<-F
 PE_abs<-F
-Value1<-T
+TD_PE<-T
+Value1<-F
 LRPE<-F
 LRPE_lite<-F
 alignment1<-F
@@ -47,7 +48,7 @@ alignment2<-F
 alignment3<-F
 alignment3c2<-F
 alignment3c3<-F
-alignment3cx<-T
+alignment3cx<-F
 alignment4<-F
 alignment5<-F
 alignment6<-F
@@ -56,6 +57,14 @@ alignment6<-F
 if (PE) {
   argu$model.name="PE1n"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE1.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if (TD_PE) {
+  argu$model.name="PE1n"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDPE.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
