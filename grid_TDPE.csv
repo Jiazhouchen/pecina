@@ -1,0 +1,10 @@
+ename,norm,normargu,valuefrom,modifier,name,style,comment,AddNeg
+infusion,evtmax_1,NA,infusion_evt,NA,infusion_evt,multiply,taskness,FALSE
+ExpRat,evtmax_1,NA,ExpRat_evt,NA,ExpRat_evt,multiply,taskness,FALSE
+feedback_bl,evtmax_1,NA,feedback_bl_evt,NA,feedback_bl_evt,multiply,taskness,FALSE
+feedback,evtmax_1,NA,feedback_evt,NA,feedback_evt,multiply,taskness,FALSE
+MoodRat,evtmax_1,NA,MoodRat_evt,NA,MoodRat_evt,multiply,taskness,FALSE
+ExpRat,evtmax_1,NA,oneLR_fixD_oneK_TD_TDError,NA,TD_PE_ExpRat,multiply,parametric,TRUE
+feedback,evtmax_1,NA,oneLR_fixD_oneK_TD_TDError,NA,TD_PE_feedback,multiply,parametric,TRUE
+MoodRat,evtmax_1,NA,oneLR_fixD_oneK_TD_TDError,NA,TD_PE_MoodRat,multiply,parametric,TRUE
+infusion,evtmax_1,NA,oneLR_fixD_oneK_TD_TDError,NA,TD_PE_inf,multiply,parametric,TRUE
