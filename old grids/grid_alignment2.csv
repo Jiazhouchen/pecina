@@ -1,0 +1,10 @@
+ename,norm,normargu,valuefrom,modifier,name,style,comment
+MoodRat,none,NA,PE_congruent,NA,con_incon_MoodRat,multiply,parametric
+ExpRat,none,NA,ExpRat_evt,NA,ExpRat_evt,multiply,taskness
+feedback,none,NA,signal_baseline_bin,NA,fb_nofb_feedback,multiply,parametric
+MoodRat,none,NA,signal_baseline_bin,NA,fb_nofb_MoodRat,multiply,parametric
+feedback,none,NA,feedback_evt,NA,feedback_evt,multiply,taskness
+ExpRat,none,NA,plac_ctrl_bin,NA,inf_noinf_ExpRat,multiply,parametric
+MoodRat,none,NA,plac_ctrl_bin,NA,inf_noinf_MoodRat,multiply,parametric
+infusion,none,NA,infusion_evt,NA,infusion_evt,multiply,taskness
+MoodRat,none,NA,MoodRat_evt,NA,MoodRat_evt,multiply,taskness

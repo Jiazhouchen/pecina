@@ -12,7 +12,7 @@ singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
+argu<-as.environment(list(nprocess=10,onlyrun=c(5,6),forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz", #c(a,b) = b>a
                           group_id_sep=c('Nalt','Plac'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
@@ -30,6 +30,8 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
+
+ValuePE<-T
 Value1<-F
 alignment1<-F
 alignment2<-F
@@ -37,7 +39,13 @@ alignment3<-F
 alignment4<-F
 alignment5<-F
 alignment6<-F
-LRPE<-T
+LRPE<-F
+
+if (ValuePE) {
+  argu$model.name="ValuePE"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ValuePE.csv"
+  argu$centerscaleall=TRUE
+}
 
 if (alignment1) {
   argu$model.name="alignment1_evtmax"
@@ -119,24 +127,56 @@ a3c_light<-fslpipe::roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa2/nf
                                       saveclustermap=TRUE,Version=NULL,corrmaskthreshold=0.95,saverdata = T,
                                       roimaskthreshold=0.001, voxelnumthres=1, clustertoget=NULL,copetoget=10,maxcore=6)
 
-value1n_roi<-fslpipe::roi_getvalue(rootdir=argu$ssub_outputroot,grproot = argu$glvl_outputroot,grp_identif = "Plac",
-                                   modelname="Value1n",saverdata = T,
-                                   basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
-                                   roimaskthreshold=0.001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
+ValuePE_roi_son2<-fslpipe::roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",
+                                   grproot ="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",grp_identif = "Plac",
+                                   modelname="ValuePE",saverdata = T,
+                                   basemask="tstat",corrp_mask="tstat",saveclustermap=TRUE,Version="stat_2.6_0",corrmaskthreshold=2.6,
+                                   roimaskthreshold=0.001, voxelnumthres=0, clustertoget=NULL,copetoget=7,maxcore=6)
+
+roi_list<-ValuePE_roi_son2
+
+for (xr in names(roi_list)){
+  roi_list[[xr]]$copename<-xr
+}
 
 
-roidf<-a3c_light$cope_10$roivalues
-roidf$Drug<-NA
-roidf$Drug[grepl("Nalt",roidf$ID)]<-"Nalt"
-roidf$Drug[grepl("Plac",roidf$ID)]<-"Plac"
-roidf$uID<-gsub("_Plac","",gsub("_Nalt","",roidf$ID))
+proc_son2_roi<-function(roi_list) {
+  if(is.null(roi_list$roivalues)){return(NULL)}else{
+    names(roi_list$roivalues)[!grepl("ID",names(roi_list$roivalues))]<-paste(names(roi_list$roivalues)[!grepl("ID",names(roi_list$roivalues))],roi_list$copename,sep = "_")
+    roi_list$roivalues$Drug<-NA
+    roi_list$roivalues$Drug[grepl("Nalt",roi_list$roivalues$ID)]<-"Nalt"
+    roi_list$roivalues$Drug[grepl("Plac",roi_list$roivalues$ID)]<-"Plac"
+    roi_list$roivalues$uID<-gsub("_Plac","",gsub("_Nalt","",roi_list$roivalues$ID))
+  }
+  return(roi_list)
+}
+
+roi_list_proc<-cleanuplist(lapply(roi_list,proc_son2_roi))
+
+t.test(x, y, paired = TRUE, alternative = "two.sided")
+
+allpairedt<-do.call(rbind,lapply(roi_list_proc,function(xr){
+  xrnames<-names(xr$roivalues)[grepl("cluster",names(xr$roivalues))]
+  DRLS<-split(xr$roivalues,xr$roivalues$Drug)
+  dfa<-merge(x = DRLS$Nalt,y = DRLS$Plac,by = "uID",all = T)
+  tresults<-do.call(rbind,lapply(xrnames,function(xname){
+    for(xz in names(dfa)[grepl(xname,names(dfa))]) {dfa[[xz]]<-as.numeric(as.character(dfa[[xz]]))}
+    xrz<-dfa[c("uID",names(dfa)[grepl(xname,names(dfa))])]
+    xrj<-t.test(xrz[[paste0(xname,".x")]], xrz[[paste0(xname,".y")]], paired = TRUE, alternative = "two.sided")
+    return(data.frame(clustername=xname,t_stat=xrj$statistic,est=xrj$estimate,p_value=xrj$p.value))
+  }))
+  return(tresults)
+}))
+
+allpairedt[allpairedt$p_value<0.05,]
+allpairedt[allpairedt$p_value<0.1,]
+
+
 roidfx<-do.call(rbind,lapply(unique(roidf$uID),function(id){
   Naltvalue<-(as.numeric(as.character(roidf[roidf$uID==id & roidf$Drug=="Nalt","cluster_1"])))
   Placvalue<-(as.numeric(as.character(roidf[roidf$uID==id & roidf$Drug=="Plac","cluster_1"])))
-  if(length(Naltvalue)>0 && length(Placvalue)>0) {
-    diff_beta<-Placvalue-Naltvalue
-  } else {diff_beta<-NA}
-  data.frame(ID=id, diff_beta=diff_beta)
+
+  data.frame(uID=id, NaltValue=Naltvalue,PlacValue=Placvalue)
 }))
 
 }

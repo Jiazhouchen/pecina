@@ -5,7 +5,7 @@
 #Check required packages:
 rm(list = ls())
 require("devtools")
-devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",upgrade = "ask",force = F)
+devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",force = F)
 library(fslpipe)
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
 source('pecina_R_utility_function.R')
@@ -18,7 +18,7 @@ runQC<-F
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+argu<-as.environment(list(nprocess=12,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
                           group_id_sep=NULL,regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
@@ -36,10 +36,16 @@ argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cl
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
+TD<-F
+TD_UP<-F
+TDS<-T
+ValuePE<-F
+BehModel_GM<-F
 Vt_PE_Plac<-F
 PE<-F
 PE_abs<-F
-TD_PE<-T
+TD_PE<-F
+TD_Error<-F
 Value1<-F
 LRPE<-F
 LRPE_lite<-F
@@ -53,68 +59,46 @@ alignment4<-F
 alignment5<-F
 alignment6<-F
 
-
-if (PE) {
-  argu$model.name="PE1n"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE1.csv"
+if(BehModel_GM){
+  argu$model.name="BehModel_GM"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
 }
 
-if (TD_PE) {
-  argu$model.name="PE1n"
+if (ValuePE) {
+  argu$model.name="ValuePE"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ValuePE.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if (TD) {
+  argu$model.name="TD_oneLR_updated"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDPE.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
 }
 
-if (PE_abs) {
-  argu$model.name="PE_abs"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE_abs.csv"
+if (TD_Error) {
+  argu$model.name="TD_Error"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDError.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
 }
 
-if (Value1) {
-  argu$model.name="Value1n"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
+if (TDS) {
+  argu$model.name="TDS"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDS_pre.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
-  argu$adminfilter=1
-}
-
-if(LRPE){
-  argu$model.name="LRPE"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe.csv"
-  argu$centerscaleall=TRUE
-  argu$proc_id_subs="_a"
-  argu$adminfilter=1
-}
-
-if(LRPE_lite){
-  argu$model.name="LRPE_lite"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe_lite.csv"
-  argu$centerscaleall=TRUE
-  argu$proc_id_subs="_a"
-  argu$adminfilter=1
-}
-if(Vt_PE_Plac){
-  argu$model.name="Vt_PE_Plac"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_value_pe_plac.csv"
-  argu$centerscaleall=TRUE
-  argu$proc_id_subs="_a"
-  argu$adminfilter=1
-}
-
-if(alignment3cx){
-  argu$model.name="alignment3cx"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c.csv"
-  argu$centerscaleall=TRUE
-  argu$proc_id_subs="_a"
-  argu$adminfilter=1
+  argu$adminfilter=1  
+  argu$old_onlyrun <- argu$onlyrun
+  argu$onlyrun=1
 }
 ###########Official Start:###########
 #Supposedly you shouldn't need to change anything down below:
@@ -148,12 +132,12 @@ son1_rework<-lapply(names(son1_split),function(x) {
 names(son1_rework)<-names(son1_split)
 #son1_split$SON1_018->son1_single
 if(singlesub){
-  son1_rework<-son1_rework["SON1_031"]
+  son1_rework<-son1_rework["SON1_018"]
 }
 #stop()
  print(names(son1_rework))
  
-if(!is.null(argu$group_id_sep) & dir.exists(file.path(argu$ssub_outputroot,argu$model.name))) {
+if(!is.null(argu$group_id_sep) && dir.exists(file.path(argu$ssub_outputroot,argu$model.name))) {
   ogdir<-file.path(argu$ssub_outputroot,argu$model.name)
   argu$model.name<-paste0(argu$model.name,"_ABCompare")
   newdir<-file.path(argu$ssub_outputroot,argu$model.name)
@@ -171,6 +155,25 @@ if(!is.null(argu$group_id_sep) & dir.exists(file.path(argu$ssub_outputroot,argu$
   save(allsub.design,file = file.path(newdir,"design.rdata"),envir = oldds)
   }
 }
+
+#####The new TD Models will come as two part;#######Temporary fix currently will be consdiered for next iteration of the pipeline
+if(TDS){
+  # fsl_pipe(
+  #   argu=argu, #This is the arguments environment, each model should have a different one;
+  #   prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
+  #   prep.call.allsub=son1_rework #List of ID list of arguments for prep.call.
+  # )
+  for(idpath in list.dirs(paste(argu$regpath,argu$model.name,sep = .Platform$file.sep),recursive = F) ) {
+    for(currun in 1:length(list.files(path = idpath,pattern = "TDS_EV_flat.1D"))){
+      x1<-as.numeric(readLines( file.path(idpath,paste0("run",currun,"_TDS_EV_flat.1D") )))
+      x2<-as.numeric(readLines( file.path(idpath,paste0("run",currun,"_TDS_PE_up.1D") )))
+      writeLines(text = as.character(x1+x2),file.path(idpath,paste0("run",currun,"_TDS_CONCAT.1D") ))
+    }
+  }
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDS_post.csv"
+  argu$old_onlyrun -> argu$onlyrun
+}
+##################################
  
  
 if(runQC){
@@ -188,9 +191,6 @@ if(runQC){
  
 
 
-
-
-
 #########Additional Functions##########
 
 
@@ -201,33 +201,114 @@ fslpipe::make_heatmap_with_design( allsub.design$SON1_018)
 }
 ####ROI Extraction#####
 if(F) {
-  alignment1_roi<-roi_getvalue(rootdir=argu$ssub_outputroot,grproot=argu$glvl_outputroot,modelname="alignment1_evtmax",
-                               basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
-                               roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
-  alignment6_roi<-roi_getvalue(rootdir=argu$ssub_outputroot,grproot=argu$glvl_outputroot,modelname="alignment6",
-                               basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
-                               roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
-  alignment3a_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+  valuePE_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
                                 grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
-                                modelname="alignment3a",
-                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.965,
-                                roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
-  alignment3b_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
-                                grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
-                                modelname="alignment3b",
-                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.965,
-                                roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
-  value1n_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
-                                grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
-                                modelname="Value1n",
-                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce0.95",corrmaskthreshold=0.95,
-                                roimaskthreshold=0.0001, voxelnumthres=10, clustertoget=NULL,copetoget=NULL,maxcore=6)
+                                modelname="ValuePE",
+                                basemask="tstat",corrp_mask="tstat",saveclustermap=TRUE,Version="stast2.7_20",corrmaskthreshold=2.7,
+                                roimaskthreshold=0.0001, voxelnumthres=20, clustertoget=NULL,copetoget=NULL,maxcore=6)
+
   
+  # for(x in names(valuePE_roi)){
+  #   names(valuePE_roi[[x]]$roivalues)<-paste0(x,"_",names(valuePE_roi[[x]]$roivalues))
+  #   
+  # }
+  valuePE_roi<-lapply(valuePE_roi,function(xrz){
+    xr<-xrz$roivalues
+    if(!is.null(xr)){
+   # print(names(xr))
+    ID<-xr[,grepl("ID",names(xr))]
+    xr_num<-xr[,!grepl("ID",names(xr))]
+    xrz$roivalues<-cbind(ID,as.data.frame(apply(xr_num,2,as.numeric)))
+    } else{xrz<-NULL}
+    return(xrz)
+  })
   #Example:
-  df<-value1n_roi$cope_7$roivalues #take the output, cope 7, 
+  df<-valuePE_roi$cope_7$roivalues #take the output, cope 7, 
   #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
   df$FullID<-paste0(df$ID,"_1") #make full ID
-  df1_admin1_wroi<-merge(df1_admin1,df,by = "FullID")
+  df1_admin1_wroi<-merge(df1_admin1,df,by = "FullID",all = T)
+  View(df1_admin1_wroi)
+  #Example:
+  df1<-valuePE_roi$cope_10$roivalues #take the output, cope 7, 
+  #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
+  df1$FullID<-paste0(df$ID,"_1") #make full ID
+  df1_admin1_wroi<-merge(df1_admin1_wroi,df1,by = "FullID",all = T)
+  names(df1_admin1_wroi)
   
+  #PCA ANALYSIS#################
+  library(corrplot)
+  library(factoextra)
+  library(readxl)
+  xr<-valuePE_roi$cope_7$roivalues
+  roiID<-xr[,grepl("ID",names(xr))]
+  just_rois<-xr[,!grepl("ID",names(xr))]
+  # feedROIcor <- cor(just_rois)
+  # corrplot(feedROIcor,type = "upper", tl.pos = "td", cl.lim=c(0,1),
+  #          method = "circle", tl.cex = 1, tl.col = 'black',
+  #          order = "hclust", diag = FALSE, 
+  #          addCoef.col="black", addCoefasPercent = FALSE,
+  #          p.mat = 1-feedROIcor, sig.level=0.3, insig = "blank")
+  # 
+  feedroipca <- prcomp(just_rois, center = TRUE, scale = TRUE)
+  # print(feedroipca)
+  # summary(feedroipca)
+  # plot(feedroipca)
+  feed_pcs <- get_pca_ind(feedroipca)
+  cope_7_feed1pc <- feed_pcs$coord[,1]
+
+  xr<-valuePE_roi$cope_10$roivalues
+  roiID<-xr[,grepl("ID",names(xr))]
+  just_rois<-xr[,!grepl("ID",names(xr))]
+  
+  feedroipca <- prcomp(just_rois, center = TRUE, scale = TRUE)
+  # print(feedroipca)
+  # summary(feedroipca)
+  # plot(feedroipca)
+  feed_pcs <- get_pca_ind(feedroipca)
+  cope_10_feed1pc <- feed_pcs$coord[,1]
+  
+  
+  pcas<-data.frame(cope7_PC1=cope_7_feed1pc,cope10_PC1=cope_10_feed1pc,ID=roiID)
+  pcas$FullID<-paste0(pcas$ID,"_1") #make full ID
+  df1_admin1_wroi<-merge(df1_admin1_wroi,pcas,by = "FullID",all = T)
+  #Create Table:
+  #cluster -i OneSampT_tfce_corrp_tstat1.nii.gz -t 0.95 --mm > cluster_t1_95.txt
+  #atlasquery -a "MNI Structural Atlas" -m "OneSampT_tfce_corrp_tstat1.nii.gz"
+  
+  
+  #FA#########################
+  whichcope<-"cope_7"
+  xr<-valuePE_roi[[whichcope]]$roivalues
+  roiID<-paste0(xr[,grepl("ID",names(xr))],"_1")
+  just_rois<-xr[,!grepl("ID",names(xr))]
+  just_rois<-data.matrix(just_rois, rownames.force = NA)
+  clust_cor <- cor(just_rois,method = 'pearson')
+  
+  setwd('~/Desktop/')
+  pdf("Value_cluster_corr_fixed.pdf", width=12, height=12)
+  corrplot(clust_cor, cl.lim=c(-1,1),
+           method = "circle", tl.cex = 1.5, type = "upper", tl.col = 'black',
+           order = "hclust", diag = FALSE,
+           addCoef.col="black", addCoefasPercent = FALSE,
+           p.mat = 1-clust_cor, sig.level=0.75, insig = "blank")
+  dev.off()
+  library(psych)
+  #test the number of factors
+  fa.parallel(just_rois)
+  vss(just_rois)
+  #Factor analyze
+  mvalue <- nfactors(clust_cor, n=5, rotate = "oblimin", diagonal = FALSE,fm = "mle", n.obs = 35, SMC = FALSE)
+  value.fa = psych::fa(just_rois, nfactors=2, rotate = "oblimin", fm = "mle")
+  fa.diagram(value.fa)
+  fscores <- factor.scores(just_rois, pe.fa)$scores
+  # write  factor scores to your dataframe
+  FA_df<-as.data.frame(fscores)
+  names(FA_df)<-paste(names(FA_df),whichcope,sep = "_")
+  df1_admin1_wFA<-merge(df1_admin1_wroi,cbind(roiID,FA_df),by.x = "FullID",by.y = "roiID",all = T)
+  
+  FA_df<-as.data.frame(fscores)
+  names(FA_df)<-paste(names(FA_df),whichcope,sep = "_")
+  df1_admin1_wFA<-merge(df1_admin1_wFA,cbind(roiID,FA_df),by.x = "FullID",by.y = "roiID",all = T)
+
 }
 

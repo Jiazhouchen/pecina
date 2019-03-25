@@ -32,6 +32,52 @@ if (alignment6) {
 }
 
 
+if (PE_abs) {
+  argu$model.name="PE_abs"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE_abs.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if (Value1) {
+  argu$model.name="Value1"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(LRPE){
+  argu$model.name="LRPE"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(LRPE_lite){
+  argu$model.name="LRPE_lite"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe_lite.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+if(Vt_PE_Plac){
+  argu$model.name="Vt_PE_Plac"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_value_pe_plac.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(alignment3cx){
+  argu$model.name="alignment3cx"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3cx.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
 
 
 if (F){
@@ -1083,6 +1129,27 @@ if (F){
       #Add more universal arguements in here:
     ))
     argu<-model1a
+    
+    all_p<-lapply(bothSONs$SON1$list,function(dfx){
+      #dfx<-dfx[dfx$VisitType=="1",]
+      ID<-unique(dfx$FullID)
+      dfx<-dfx[grep("oneLR_fixD_oneK_TD_Value_",names(dfx))]
+      dfx$TrialNum<-1:nrow(dfx)
+      mdfx<-melt(dfx,id.vars="TrialNum")
+      mdfx$cat<-gsub("oneLR_fixD_oneK_TD_Value_","",mdfx$variable)
+      mdfx$cat_s[mdfx$cat < 5]<-"Reinf"
+      mdfx$cat_s[mdfx$cat > 4]<-"Plac"
+      mdfx$cat[mdfx$cat_s=="Plac"]<-as.numeric(mdfx$cat[mdfx$cat_s=="Plac"])-4
+      a<-ggplot(mdfx,aes(TrialNum,value,color=cat))+geom_smooth()+facet_wrap(~cat_s)
+      ggsave(filename = paste0("./plots/oneK_TD",ID,".png"),plot = a)
+    })
+    
+    
+        
+    
+      
+    ggplot(dfx,aes(TrialNum,oneLR_fixD_oneK_PE,color=Participant))+geom_smooth()
+    ggplot(dfx,aes(TrialNum,oneLR_fixD_oneK_,color=InfusionNum))+geom_smooth()
   }
   if (YES) {
 argu$adaptive_ssfeat<-FALSE

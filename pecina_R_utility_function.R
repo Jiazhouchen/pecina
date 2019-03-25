@@ -168,6 +168,10 @@ prep.son1<-function(son1_single = NULL,QC=F,
   son1_single$WillImpRt[which(is.na(son1_single$WillImpRt))]<-0
   son1_single$ImprovedRt[which(is.na(son1_single$ImprovedRt))]<-0
   
+  if(any(grepl("TD",names(son1_single)))){
+    #Let's get the PE;
+    son1_single$Acculated_height<-son1_single$oneLR_fixD_oneK_TD_TDError + son1_single$oneLR_fixD_oneK_TD_Value_9
+  }
   
   
   finalist<-list(infusion=data.frame(event="infusion",
@@ -175,6 +179,21 @@ prep.son1<-function(son1_single = NULL,QC=F,
                                      duration=4, #Since it's designed for 4 seconds let's just do 4 seconds
                                      run=son1_single$Run,
                                      trial=son1_single$TrialNum),
+                 TD=data.frame(event="TD",
+                                     onset=son1_single$InfOnset,
+                                     duration=son1_single$Feed2Onset - son1_single$InfOnset, #Since it's designed for 4 seconds let's just do 4 seconds
+                                     run=son1_single$Run,
+                                     trial=son1_single$TrialNum),
+                 feedback_PE = data.frame(event="feedback_PE",
+                               onset=son1_single$Feed2Onset,
+                               duration=(son1_single$Feed2Onset - son1_single$Feed1Onset)+1, #Since it's designed for 4 seconds let's just do 4 seconds
+                               run=son1_single$Run,
+                               trial=son1_single$TrialNum),
+                 TD_error = data.frame(event="TD_error",
+                                       onset=son1_single$Feed1Onset,
+                                       duration=1, #Since it's designed for 4 seconds let's just do 4 seconds
+                                       run=son1_single$Run,
+                                       trial=son1_single$TrialNum),
                  feedback=data.frame(event="feedback",
                                      onset=son1_single$Feed2Onset,
                                      duration=son1_single$ImprovedOnset - son1_single$Feed2Onset,
