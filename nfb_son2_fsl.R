@@ -12,11 +12,11 @@ singlesub<-FALSE
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=10,onlyrun=c(5,6),forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
+argu<-as.environment(list(nprocess=4,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb_son2.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa2/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz", #c(a,b) = b>a
                           group_id_sep=c('Nalt','Plac'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
-                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",whichttest = c("paired","onesample"),
+                          ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",whichttest = c("paired"),
                           glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",centerscaleall=FALSE,
                           templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
                           ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_ssfeat_general_adaptive_template_R.fsf",
@@ -34,15 +34,11 @@ argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabl
 ValuePE<-T
 Value1<-F
 alignment1<-F
-alignment2<-F
-alignment3<-F
-alignment4<-F
-alignment5<-F
-alignment6<-F
 LRPE<-F
+exp_rating<-F
 
 if (ValuePE) {
-  argu$model.name="ValuePE"
+  argu$model.name="ValuePE_noprior"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ValuePE.csv"
   argu$centerscaleall=TRUE
 }
@@ -51,35 +47,14 @@ if (alignment1) {
   argu$model.name="alignment1_evtmax"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment1.csv"
 }
-if (alignment2) {
-  argu$model.name="alignment2"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment2.csv"
-}
-if (alignment3) {
-    argu$model.name="alignment3c_light"
-    argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c_light.csv"
-}
-if (alignment4) {
-  argu$model.name="alignment4"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment4.csv"
-}
-if (alignment5) {
-  argu$model.name="alignment5"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment5.csv"
-}
-if (alignment6) {
-  argu$model.name="alignment6"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment6.csv"
-}
-if (Value1) {
-  argu$model.name="Value1n"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value1.csv"
-  argu$centerscaleall=TRUE
-  argu$adminfilter=NULL
-}
 if(LRPE){
   argu$model.name="LRPE"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_vt_pe.csv"
+  argu$centerscaleall=TRUE
+}
+if(exp_rating){
+  argu$model.name="exp_rating"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_exprat.csv"
   argu$centerscaleall=TRUE
 }
 ###################
@@ -131,31 +106,38 @@ ValuePE_roi_son2<-fslpipe::roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonr
                                    grproot ="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",grp_identif = "Plac",
                                    modelname="ValuePE",saverdata = T,
                                    basemask="tstat",corrp_mask="tstat",saveclustermap=TRUE,Version="stat_2.6_0",corrmaskthreshold=2.6,
-                                   roimaskthreshold=0.001, voxelnumthres=0, clustertoget=NULL,copetoget=7,maxcore=6)
+                                   roimaskthreshold=0.001, voxelnumthres=30, clustertoget=NULL,copetoget=c(7,10),maxcore=6)
 
-roi_list<-ValuePE_roi_son2
 
+exp_rating_tstat2.5_roi<-fslpipe::roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa2/nfb/ssanalysis/fsl",
+                                        grproot ="/Volumes/bek/neurofeedback/sonrisa2/nfb/grpanal/fsl",grp_identif = "Plac",
+                                        modelname="exp_rating",saverdata = T,
+                                        basemask="tstat",corrp_mask="tstat",saveclustermap=TRUE,Version="stat_2.5_0",corrmaskthreshold=2.5,
+                                        roimaskthreshold=0.001, voxelnumthres=30, clustertoget=NULL,copetoget=12,maxcore=6)
+
+exp_rating_tstat2.5_roi$cope_12$roivalues<-exp_rating_tstat2.5_roi$cope_12$roivalues[c(paste0("cope12_cluster_",exp_rating_tstat2.5_roi$cope_12$index$`Cluster Index`[exp_rating_tstat2.5_roi$cope_12$index$Voxels > 30]),"ID")]
+roi_list<-exp_rating_tstat2.5_roi
 for (xr in names(roi_list)){
   roi_list[[xr]]$copename<-xr
 }
 
-
 proc_son2_roi<-function(roi_list) {
   if(is.null(roi_list$roivalues)){return(NULL)}else{
     names(roi_list$roivalues)[!grepl("ID",names(roi_list$roivalues))]<-paste(names(roi_list$roivalues)[!grepl("ID",names(roi_list$roivalues))],roi_list$copename,sep = "_")
-    roi_list$roivalues$Drug<-NA
-    roi_list$roivalues$Drug[grepl("Nalt",roi_list$roivalues$ID)]<-"Nalt"
-    roi_list$roivalues$Drug[grepl("Plac",roi_list$roivalues$ID)]<-"Plac"
+    roi_list$roivalues$VisitType<-NA
+    roi_list$roivalues$VisitType[grepl("Nalt",roi_list$roivalues$ID)]<-"Nalt"
+    roi_list$roivalues$VisitType[grepl("Plac",roi_list$roivalues$ID)]<-"Plac"
     roi_list$roivalues$uID<-gsub("_Plac","",gsub("_Nalt","",roi_list$roivalues$ID))
   }
   return(roi_list)
 }
 
-roi_list_proc<-cleanuplist(lapply(roi_list,proc_son2_roi))
+#roi_list_proc<-cleanuplist(lapply(ValuePE_roi_son2,proc_son2_roi))
 
-t.test(x, y, paired = TRUE, alternative = "two.sided")
+alldf<-cbind(roi_list$cope_12$roivalues)
+alldf<-alldf[unique(names(alldf))]
 
-allpairedt<-do.call(rbind,lapply(roi_list_proc,function(xr){
+allpairedt<-do.call(rbind,lapply(roi_list,function(xr){
   xrnames<-names(xr$roivalues)[grepl("cluster",names(xr$roivalues))]
   DRLS<-split(xr$roivalues,xr$roivalues$Drug)
   dfa<-merge(x = DRLS$Nalt,y = DRLS$Plac,by = "uID",all = T)

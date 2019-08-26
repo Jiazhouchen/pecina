@@ -1,3 +1,29 @@
+if (TD) {
+  argu$model.name="TD_oneLR_updated"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDPE.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if (TD_Error) {
+  argu$model.name="TD_Error"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDError.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if (TDS) {
+  argu$model.name="TDS"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDS_pre.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1  
+  argu$old_onlyrun <- argu$onlyrun
+  argu$onlyrun=1
+}
+
 
 if (alignment1) {
   argu$model.name="alignment1ar"

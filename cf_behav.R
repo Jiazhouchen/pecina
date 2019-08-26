@@ -9,16 +9,16 @@
 #exclude_cf function can be modified to exclude subject based on conditions, currently only has miss rate of higher than 20.2%; 
 
 #Change your box dir here: Windows remember to change it to / instead of \
-boxdir<-"/Volumes/bek/Box Sync"
+#boxdir<-"/Volumes/bek/Box Sync"
 
 #########FUNCTIONS################
 #Base get behavioral data function:
-
+ifrun<-FALSE
 proc_behav_cf<-function(boxdir=NULL,datafolder=NULL,fmriproc=F,behav.list=F,behav.df=F,outputdir=NULL,inscan=T) {
   
-  if (grepl(" ",boxdir)) {
-    sub("Box Sync","/'Box Sync/'",boxdir)->boxdir
-  }
+  # if (grepl(" ",boxdir)) {
+  #   sub("Box Sync","/'Box Sync/'",boxdir)->boxdir
+  # }
   #GitHub/SC_task/OutScan_responses
   #Sort data into right format: 
   if (inscan){
@@ -209,8 +209,9 @@ proc_outscan_cf<-function(cfo) {
 }
 ##########END FUNCTIONS##########
 
-
 #############ACTUAL SCRIPT###########################
+if(ifrun){
+boxdir<-"~/Box"
 CF<-proc_singlesub_cf(proc_behav_cf(boxdir = boxdir,behav.list = T))
 CF_outscan<-lapply(proc_behav_cf(boxdir = boxdir,behav.list = T,inscan = F),proc_outscan_cf)
 
@@ -279,7 +280,7 @@ print(paste0("The overall miss rate of this sample is: ",as.numeric(table(is.na(
 
 save(CF,CF_ALL,CF_P,CF_P_ALL,CF_outscan,CF_outscan_ALL,file = "cf_behav_data.rdata")
 #Separate single sub proc as a different function for easy editing:
-
+}
 
 
 

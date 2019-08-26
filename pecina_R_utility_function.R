@@ -9,6 +9,40 @@ source_script_github <- function(gitscripturl) {
   eval(parse(text = script), envir= .GlobalEnv)
 }
 
+nfb_getdata<-function(boxdir="~/Box",grp_sep=argu$group_id_sep,proc_id_sub=argu$proc_id_subs,QCflag=runQC,verbose=T){
+  son_all<-as.environment(list())
+  load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","nfb_behav.rdata"),envir = son_all)
+  son1_all<-son_all$bothSONs$SON1$df
+  #Split them into mulitiple participants
+  if(is.null(grp_sep)){
+    son1_split<-split(son1_all,son1_all$Participant)
+  } else {
+    son1_split<-split(son1_all,son1_all$FullID)
+    names(son1_split)<-gsub("_2$","_b",gsub("_1$","_a",names(son1_split)))
+  }
+  
+  son1_rework<-lapply(names(son1_split),function(x) {
+    son1_split[[x]]->y
+    if(!is.null(grp_sep)){
+      if (grepl("_a",x)){adminifilter=1}else if (grepl("_b",x)){adminifilter=2}
+      
+    } else if (!is.null(proc_id_sub)) {
+      if (argu$proc_id_subs=="_a"){adminifilter=1}else if (argu$proc_id_subs=="_b"){adminifilter=2}
+    }else {
+      adminifilter=NULL
+    }
+    return(list(son1_single=y,adminfilter=adminifilter,QC=QCflag))
+    
+    
+  })
+  names(son1_rework)<-names(son1_split)
+  if(verbose){
+  message("Will run with ",length(son1_rework), " subjects.")
+  message(paste(names(son1_rework),collapse = ", "))
+  }
+  return(son1_rework)
+}
+
 ###SON1 single sub Behavr Proc function:
 prep.son1<-function(son1_single = NULL,QC=F,
                     regualrvarinames=c('Participant','ColorSet','Feed1Onset','Feed2Onset','Feed3Onset','Feedback',
@@ -39,10 +73,12 @@ prep.son1<-function(son1_single = NULL,QC=F,
   }
   vba<-as.list(son1_single[c(!names(son1_single) %in% regualrvarinames)])
   #vba<-addcenterscaletolist(vba)  ##Function Coming from fMRI_Dev Script
+  if(nrow(son1_single)<1){return(NULL)}
   son1_single$plac_ctrl <- NA
   son1_single$plac_ctrl[son1_single$InfusionNum==1 | son1_single$InfusionNum==2] <- TRUE
   son1_single$plac_ctrl[son1_single$InfusionNum==3 | son1_single$InfusionNum==4] <- FALSE
   son1_single$plac_ctrl_r<-!son1_single$plac_ctrl
+  
   #Creating a binary variable
   #son1_single$plac_ctrl_bin<-son1_single$plac_ctrl
   son1_single$plac_ctrl_bin <- NA
@@ -50,6 +86,9 @@ prep.son1<-function(son1_single = NULL,QC=F,
   son1_single$plac_ctrl_bin[which(son1_single$plac_ctrl)]<-1
   son1_single$plac_ctrl_bin[which(!son1_single$plac_ctrl)]<-(-1)
 
+  son1_single$inf_cali<-NA
+  son1_single$inf_cali[which(son1_single$plac_ctrl)]<-1
+  son1_single$inf_cali[which(!son1_single$plac_ctrl)]<-0
   
   son1_single$signal_baseline <- NA
   son1_single$signal_baseline[son1_single$Feedback=="Signal"] <- TRUE
@@ -64,6 +103,9 @@ prep.son1<-function(son1_single = NULL,QC=F,
   son1_single$contingency[which(son1_single$InfusionNum %in% c("1","3"))]<-1
   son1_single$contingency[which(son1_single$InfusionNum %in% c("2","4"))]<-(-1)
   
+  son1_single$condizeroone<-NA
+  son1_single$condizeroone[which(son1_single$signal_baseline)]<-1
+  son1_single$condizeroone[which(!son1_single$signal_baseline)]<-0
   
   son1_single$ExpRat<-NA
   son1_single$ExpRat[son1_single$WillImpRespText=="Yes"] <- TRUE
@@ -140,9 +182,9 @@ prep.son1<-function(son1_single = NULL,QC=F,
     son1_single[[paste0("cond",cond)]]<-0
     son1_single[[paste0("cond",cond)]][as.character(son1_single$InfusionNum)==as.character(cond)]<-1
   }
-  son1_single$LRPE<- as.numeric(as.character(son1_single$oneLR_fixD_oneK_LR_1)) * as.numeric(as.character(son1_single$oneLR_fixD_oneK_PE))
-  son1_single$oneLR_fixD_oneK_PE_abs<-abs(son1_single$oneLR_fixD_oneK_PE)
-  son1_single$oneLR_fixD_oneK_PE_abs_neg<-abs(son1_single$oneLR_fixD_oneK_PE)
+  #son1_single$LRPE<- as.numeric(as.character(son1_single$oneLR_fixD_oneK_LR_1)) * as.numeric(as.character(son1_single$oneLR_fixD_oneK_PE))
+  #son1_single$oneLR_fixD_oneK_PE_abs<-abs(son1_single$oneLR_fixD_oneK_PE)
+  #son1_single$oneLR_fixD_oneK_PE_abs_neg<-abs(son1_single$oneLR_fixD_oneK_PE)
   vba<-as.list(son1_single[c(!names(son1_single) %in% regualrvarinames)])
   #Add taskness variables to value
   vba$plac_ctrl<-son1_single$plac_ctrl
@@ -159,7 +201,7 @@ prep.son1<-function(son1_single = NULL,QC=F,
   #vba$twoLR_fixD_oneK_PEshifted_centerscaled<-as.numeric(scale(son1_single$twoLR_fixD_oneK_PEshifted,center=T))
   #vba$oneLR_fixD_oneK_vt1_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_vt1,center=T))
   #vba$oneLR_fixD_oneK_PEshifted_centerscaled<-as.numeric(scale(son1_single$oneLR_fixD_oneK_PEshifted,center=T))
-  vba$PE_congruent_centerscaled<-scale(son1_single$PE_congruent,center = T)
+  #vba$PE_congruent_centerscaled<-scale(son1_single$PE_congruent,center = T)
   
   #vba$ExpRat_bin<-plyr::mapvalues(x = son1_single$WillImpRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
   #vba$MoodRat_bin<-plyr::mapvalues(x = son1_single$ImprovedRespBin,from = c(0:1),to = c(-1,1),warn_missing = F)
@@ -248,7 +290,8 @@ prep.son1<-function(son1_single = NULL,QC=F,
 
 ##Con_Frame Prep
 prep.confram<-function(singlesub=NULL) {
-  conframe<-rbind(singlesub[[1]],singlesub[[2]])
+  tobind<-singlesub[grepl("Order[0-9]",names(singlesub))]
+  conframe<-do.call(rbind,tobind)
   
   #For Rating bias model no use;
   #conframe$Rating_w_bias[is.na(conframe$Rating_w_bias)]<-0
@@ -307,7 +350,7 @@ prep.confram<-function(singlesub=NULL) {
   
   finalist<-list(trial=data.frame(event="trial",
                                   onset=conframe$ContextOnset,
-                                  duration=conframe$Duration,
+                                  duration=5,
                                   run=conframe$Order,
                                   trial=conframe$Trial),
                  face=data.frame(event="face",
@@ -316,11 +359,8 @@ prep.confram<-function(singlesub=NULL) {
                                  run=conframe$Order,
                                  trial=conframe$Trial)
   )
-  for (i in 1:length(finalist)) {
-    if (i==1) {ktz<-finalist[[i]]} else {
-      ktz<-rbind(ktz,finalist[[i]])}
-  }
-  finalist[["allconcat"]]<-ktz
+  
+  finalist[["allconcat"]]<-finalist$trial
   vba<-list(PxH=conframe$PxH,
             PxF=conframe$PxF,
             PxN=conframe$PxN,

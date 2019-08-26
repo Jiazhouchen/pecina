@@ -5,63 +5,97 @@
 #Check required packages:
 rm(list = ls())
 require("devtools")
-devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",force = F)
+devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",force = F,quiet = T,ask = FALSE)
 library(fslpipe)
-if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab")}
+if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab",force=F)}
 source('pecina_R_utility_function.R')
 
 #Setting up FSL global enviroment variables in case we are using RStudio
 fsl_2_sys_env()
-
+if(Sys.getenv("runPIPE")==""){runPIPE<-TRUE}else{runPIPE<-Sys.getenv("runPIPE")}
 singlesub<-F
 runQC<-F
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=12,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+argu<-as.environment(list(nprocess=11,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
                           group_id_sep=NULL,regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
                           ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",centerscaleall=FALSE,
                           glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
-                          templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",whichttest = c("paired","onesample"),
+                          templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",whichttest = c("onesample"),
                           ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_ssfeat_general_adaptive_template_R.fsf",
                           glvl_output="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",ifoverwrite_secondlvl=FALSE,hig_lvl_path_filter=NULL,
                           graphic.threshold=0.95,nuisa_motion=c("nuisance","motion_par"),motion_type="fd", motion_threshold="default",convlv_nuisa=F))
 #DO NOT PROVIDE THOSE TWO AND IT WILL BE FINE;
 #argu$thresh_cluster_extent<-3.1 
 #argu$thresh_cluster_mass<-3.1
+argu$cfg<-cfg_info(cfgpath = argu$cfgpath)
 argu$randomize_p_threshold<-0.001
 argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cluster-based-extent")
 argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
 
-TD<-F
-TD_UP<-F
-TDS<-T
+ValuePE_FixPara_Int<-F
+ValuePE_u_Int<-F
+BehModel_GM_new<-F
+ValuePE_FixPara<-F
+Fb<-F
 ValuePE<-F
-BehModel_GM<-F
-Vt_PE_Plac<-F
+BehModel_GM<-T
+exp_rating<- F
+PlacInReinf<-F
+ReinfInPlac<-F
+Value<-F
 PE<-F
-PE_abs<-F
-TD_PE<-F
-TD_Error<-F
-Value1<-F
-LRPE<-F
-LRPE_lite<-F
-alignment1<-F
-alignment2<-F
-alignment3<-F
-alignment3c2<-F
-alignment3c3<-F
-alignment3cx<-F
-alignment4<-F
-alignment5<-F
-alignment6<-F
+Value_RATEVT<-F
+PE_RATEVT<-F
+
+if(ValuePE_FixPara_Int){
+  argu$model.name="ValuePE_FixPara_Int"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ValuePE_fixPara_Int.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(ValuePE_u_Int){
+  argu$model.name="ValuePE_u_Int"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ValuePE_u_Int.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+
+if(ValuePE_FixPara){
+  argu$model.name="ValuePE_FixPara"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ValuePE_fixPara.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(Fb){
+  argu$model.name="Fb"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_feedback.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
 
 if(BehModel_GM){
   argu$model.name="BehModel_GM"
   argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(BehModel_GM_new){
+  argu$model.name="BehModel_GM_new"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_alignment3c_new.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
@@ -75,68 +109,55 @@ if (ValuePE) {
   argu$adminfilter=1
 }
 
-if (TD) {
-  argu$model.name="TD_oneLR_updated"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDPE.csv"
+if (exp_rating) {
+  argu$model.name="exp_rating"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_exprat.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
 }
 
-if (TD_Error) {
-  argu$model.name="TD_Error"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDError.csv"
+if (PlacInReinf) {
+  argu$model.name="PlacInReinf"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PlacInReinf.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
   argu$adminfilter=1
 }
 
-if (TDS) {
-  argu$model.name="TDS"
-  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_TDS_pre.csv"
+if (ReinfInPlac) {
+  argu$model.name="ReinfInPlac"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ReinfInPlac.csv"
   argu$centerscaleall=TRUE
   argu$proc_id_subs="_a"
-  argu$adminfilter=1  
-  argu$old_onlyrun <- argu$onlyrun
-  argu$onlyrun=1
+  argu$adminfilter=1
 }
+
+if (Value_RATEVT) {
+  argu$model.name="Value_RateEVT"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_Value_RateEvt.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if (PE_RATEVT) {
+  argu$model.name="PE_RateEVT"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PE_RateEvt.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
 ###########Official Start:###########
 #Supposedly you shouldn't need to change anything down below:
 #If you are just switching models
+son1_rework<-nfb_getdata(boxdir = "~/Box",grp_sep = argu$group_id_sep,proc_id_sub = argu$proc_id_subs,QCflag=runQC)
 
-
-boxdir <- "~/Box/"
-
-son_all<-as.environment(list())
-load(file.path(boxdir,"GitHub","Nfb_task","NFB_response","SON1&2_behav_results","nfb_behav.rdata"),envir = son_all)
-son1_all<-son_all$bothSONs$SON1$df
-#Split them into mulitiple participants
-if(is.null(argu$group_id_sep)){
-son1_split<-split(son1_all,son1_all$Participant)
-} else {
-son1_split<-split(son1_all,son1_all$FullID)
-names(son1_split)<-gsub("_2$","_b",gsub("_1$","_a",names(son1_split)))
-}
-son1_rework<-lapply(names(son1_split),function(x) {
-  son1_split[[x]]->y
-  if(exists("proc_id_subs",envir = argu)){
-    if (argu$proc_id_subs=="_a"){adminifilter=1}else if (argu$proc_id_subs=="_b"){adminifilter=2}
-
-  } else {
-    adminifilter=NULL
-  }
-  return(list(son1_single=y,adminfilter=adminifilter,QC=runQC))
-
-  
-})
-names(son1_rework)<-names(son1_split)
-#son1_split$SON1_018->son1_single
 if(singlesub){
   son1_rework<-son1_rework["SON1_018"]
 }
-#stop()
- print(names(son1_rework))
- 
+
 if(!is.null(argu$group_id_sep) && dir.exists(file.path(argu$ssub_outputroot,argu$model.name))) {
   ogdir<-file.path(argu$ssub_outputroot,argu$model.name)
   argu$model.name<-paste0(argu$model.name,"_ABCompare")
@@ -157,7 +178,7 @@ if(!is.null(argu$group_id_sep) && dir.exists(file.path(argu$ssub_outputroot,argu
 }
 
 #####The new TD Models will come as two part;#######Temporary fix currently will be consdiered for next iteration of the pipeline
-if(TDS){
+if(F){
   # fsl_pipe(
   #   argu=argu, #This is the arguments environment, each model should have a different one;
   #   prep.call.func="prep.son1", #This should be a character string that's the name of the prep proc function
@@ -174,8 +195,8 @@ if(TDS){
   argu$old_onlyrun -> argu$onlyrun
 }
 ##################################
- 
- 
+ if(runPIPE){
+stop("DIDN'T WORK!")
 if(runQC){
   cfg<-cfg_info(cfgpath = argu$cfgpath)
   info_qc<-QC_pipe(cfgpath=argu$cfgpath,QC_func="prep.son1",supplylist = son1_rework,hdtemplate=argu$templatedir,
@@ -190,7 +211,7 @@ if(runQC){
 }
  
 
-
+}
 #########Additional Functions##########
 
 
@@ -202,34 +223,66 @@ fslpipe::make_heatmap_with_design( allsub.design$SON1_018)
 ####ROI Extraction#####
 if(F) {
   valuePE_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
-                                grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",
+                                grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl", forceconcat = T,
                                 modelname="ValuePE",
                                 basemask="tstat",corrp_mask="tstat",saveclustermap=TRUE,Version="stast2.7_20",corrmaskthreshold=2.7,
                                 roimaskthreshold=0.0001, voxelnumthres=20, clustertoget=NULL,copetoget=NULL,maxcore=6)
-
+  
+  valuePE_noprior_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+                            grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",forceconcat = T,
+                            modelname="ValuePE_noprior",
+                            basemask="tstat",corrp_mask="tstat",saveclustermap=TRUE,Version="tstat_2.5",corrmaskthreshold=2.5,
+                            roimaskthreshold=0.0001, voxelnumthres=20, clustertoget=NULL,copetoget=NULL,maxcore=6)
+  
+  exp_rating_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+                            grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl", forceconcat = T,
+                            modelname="exp_rating",
+                            basemask="tstat",corrp_mask="tstat",saveclustermap=TRUE,Version="tstat_2.5_20",corrmaskthreshold=2.5,
+                            roimaskthreshold=0.0001, voxelnumthres=20, clustertoget=NULL,copetoget=12,maxcore=6)
+  
+  BehModel_GM_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+                                    grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",forceconcat = T,
+                                    modelname="BehModel_GM",
+                                    basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce_090",corrmaskthreshold=0.90,
+                                    roimaskthreshold=0.0001, voxelnumthres=20, clustertoget=NULL,copetoget=c(12,7),maxcore=6)
+  
+  ValuePE_FixPara_roi<-roi_getvalue(rootdir="/Volumes/bek/neurofeedback/sonrisa1/nfb/ssanalysis/fsl",
+                                grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",forceconcat = T,
+                                modelname="ValuePE_FixPara",
+                                basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce_095_95",corrmaskthreshold=0.95,
+                                roimaskthreshold=0.0001, voxelnumthres=0, clustertoget=NULL,copetoget=c(10,7),maxcore=6)
   
   # for(x in names(valuePE_roi)){
   #   names(valuePE_roi[[x]]$roivalues)<-paste0(x,"_",names(valuePE_roi[[x]]$roivalues))
   #   
   # }
-  valuePE_roi<-lapply(valuePE_roi,function(xrz){
+  
+  ValuePE_FixPara_roi<-lapply(ValuePE_FixPara_roi,function(xrz){
     xr<-xrz$roivalues
     if(!is.null(xr)){
    # print(names(xr))
-    ID<-xr[,grepl("ID",names(xr))]
-    xr_num<-xr[,!grepl("ID",names(xr))]
-    xrz$roivalues<-cbind(ID,as.data.frame(apply(xr_num,2,as.numeric)))
+    ID_var <- names(xr)[grepl("ID",names(xr))]
+    xr_var <- names(xr)[!grepl("ID",names(xr))]
+    xr_num <- xr[xr_var]
+    ID <- xr[ID_var]
+      xrz$roivalues<-cbind(ID,as.data.frame(apply(xr_num,2,as.numeric)))
     } else{xrz<-NULL}
     return(xrz)
   })
   #Example:
-  df<-valuePE_roi$cope_7$roivalues #take the output, cope 7, 
+  df<-ValuePE_FixPara_roi$cope_7$roivalues #take the output, cope 7, 
   #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
   df$FullID<-paste0(df$ID,"_1") #make full ID
   df1_admin1_wroi<-merge(df1_admin1,df,by = "FullID",all = T)
-  View(df1_admin1_wroi)
+ 
   #Example:
-  df1<-valuePE_roi$cope_10$roivalues #take the output, cope 7, 
+  df1<-ValuePE_FixPara_roi$cope_10$roivalues #take the output, cope 7, 
+  #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
+  df1$FullID<-paste0(df$ID,"_1") #make full ID
+  ValuePE_FixPara_roi<-merge(df1_admin1_wroi,df1,by = "FullID",all = T)
+  names(df1_admin1_wroi)
+  
+  df2<-valuePE_roi$cope_10$roivalues #take the output, cope 7, 
   #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
   df1$FullID<-paste0(df$ID,"_1") #make full ID
   df1_admin1_wroi<-merge(df1_admin1_wroi,df1,by = "FullID",all = T)
@@ -239,7 +292,7 @@ if(F) {
   library(corrplot)
   library(factoextra)
   library(readxl)
-  xr<-valuePE_roi$cope_7$roivalues
+  xr<-BehModel_GM_roi$cope_12$roivalues
   roiID<-xr[,grepl("ID",names(xr))]
   just_rois<-xr[,!grepl("ID",names(xr))]
   # feedROIcor <- cor(just_rois)
@@ -261,6 +314,7 @@ if(F) {
   just_rois<-xr[,!grepl("ID",names(xr))]
   
   feedroipca <- prcomp(just_rois, center = TRUE, scale = TRUE)
+  
   # print(feedroipca)
   # summary(feedroipca)
   # plot(feedroipca)
@@ -298,7 +352,7 @@ if(F) {
   vss(just_rois)
   #Factor analyze
   mvalue <- nfactors(clust_cor, n=5, rotate = "oblimin", diagonal = FALSE,fm = "mle", n.obs = 35, SMC = FALSE)
-  value.fa = psych::fa(just_rois, nfactors=2, rotate = "oblimin", fm = "mle")
+  value.fa = psych::fa(just_rois, nfactors=3, rotate = "oblimin", fm = "mle")
   fa.diagram(value.fa)
   fscores <- factor.scores(just_rois, pe.fa)$scores
   # write  factor scores to your dataframe
@@ -309,6 +363,63 @@ if(F) {
   FA_df<-as.data.frame(fscores)
   names(FA_df)<-paste(names(FA_df),whichcope,sep = "_")
   df1_admin1_wFA<-merge(df1_admin1_wFA,cbind(roiID,FA_df),by.x = "FullID",by.y = "roiID",all = T)
-
+  
+  
+  ##!!!!!GETTING TIME SERIRES IS TIME CONSUMING AND SHOULD CONSIDER SAVING THE RESULTS!!!#
+  ###Cope 7: 100 (VS), 86 (mPFC), 76 (rACC), 71 (vlPFC), 73 (lOFC).
+  ###Cope 10: 87 (VS), 78 (lOFC)
+  if(file.exists("allcpcl.rdata")){load("allcpcl.rdata")}else{
+    allcpcl<-new.env()
+    allcpcl$CP7CL100<-get_timeserires(ssub_root = "/Volumes/bek/neurofeedback/sonrisa1/proc/",templatepath = "/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                                      maskpath = "/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl/ValuePE/cope7_randomize_onesample_ttest/ROI_masks_stast2.7_20/cluster_mask_100.nii.gz",
+                                      tarname = "nfswudktm_nfb[0-9]_7.nii.gz",submaskname = "subject_mask.nii.gz",parallen = 10,depthcontr = 3)
+    
+    allcpcl$CP7CL86<-get_timeserires(ssub_root = "/Volumes/bek/neurofeedback/sonrisa1/proc/",templatepath = "/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                                     maskpath = "/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl/ValuePE/cope7_randomize_onesample_ttest/ROI_masks_stast2.7_20/cluster_mask_86.nii.gz",
+                                     tarname = "nfswudktm_nfb[0-9]_7.nii.gz",submaskname = "subject_mask.nii.gz",parallen = 10,depthcontr = 3)
+    allcpcl$CP7CL76<-get_timeserires(ssub_root = "/Volumes/bek/neurofeedback/sonrisa1/proc/",templatepath = "/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                                     maskpath = "/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl/ValuePE/cope7_randomize_onesample_ttest/ROI_masks_stast2.7_20/cluster_mask_76.nii.gz",
+                                     tarname = "nfswudktm_nfb[0-9]_7.nii.gz",submaskname = "subject_mask.nii.gz",parallen = 10,depthcontr = 3)
+    allcpcl$CP7CL71<-get_timeserires(ssub_root = "/Volumes/bek/neurofeedback/sonrisa1/proc/",templatepath = "/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                                     maskpath = "/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl/ValuePE/cope7_randomize_onesample_ttest/ROI_masks_stast2.7_20/cluster_mask_76.nii.gz",
+                                     tarname = "nfswudktm_nfb[0-9]_7.nii.gz",submaskname = "subject_mask.nii.gz",parallen = 10,depthcontr = 3)
+    allcpcl$CP7CL73<-get_timeserires(ssub_root = "/Volumes/bek/neurofeedback/sonrisa1/proc/",templatepath = "/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                                     maskpath = "/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl/ValuePE/cope7_randomize_onesample_ttest/ROI_masks_stast2.7_20/cluster_mask_71.nii.gz",
+                                     tarname = "nfswudktm_nfb[0-9]_7.nii.gz",submaskname = "subject_mask.nii.gz",parallen = 10,depthcontr = 3)
+    allcpcl$CP10CL87<-get_timeserires(ssub_root = "/Volumes/bek/neurofeedback/sonrisa1/proc/",templatepath = "/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                                      maskpath = "/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl/ValuePE/cope10_randomize_onesample_ttest/ROI_masks_stast2.7_20/cluster_mask_87.nii.gz",
+                                      tarname = "nfswudktm_nfb[0-9]_7.nii.gz",submaskname = "subject_mask.nii.gz",parallen = 10,depthcontr = 3)
+    allcpcl$CP10CL78<-get_timeserires(ssub_root = "/Volumes/bek/neurofeedback/sonrisa1/proc/",templatepath = "/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",
+                                      maskpath = "/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl/ValuePE/cope10_randomize_onesample_ttest/ROI_masks_stast2.7_20/cluster_mask_78.nii.gz",
+                                      tarname = "nfswudktm_nfb[0-9]_7.nii.gz",submaskname = "subject_mask.nii.gz",parallen = 10,depthcontr = 3)
+    save(allcpcl,file = "allcpcl.rdata")
+  }
+  
+  
+  
+  son1_alltsbeta<-lapply(objects(allcpcl),function(nx){
+    if(grepl("CP7",nx)){evtn="ExpRat"} else if (grepl("CP10",nx)){evtn="feedback"}else{stop("evt not supported")}
+    deconv_timeseries(datalist = nfb_getdata(boxdir = "~/Box",grp_sep = c("a","b"),proc_id_sub = NULL,QCflag=F,verbose = F),
+                              tslist =  get(nx,envir = allcpcl),
+                              func.proc = prep.son1,evtname = evtn,tr = argu$cfg$preproc_call$tr,num.calibrate = 1,
+                              variname = nx,func.deconv = mean)
+    
+  })
+  df_to_merge<-df1_admin1
+  for (ty in son1_alltsbeta) {
+    aty<-do.call(rbind,ty)
+    aty$FullID<-gsub("_b","_2",gsub("_a","_1",aty$ID))
+    aty$Run<-aty$run; aty$TrialNum<-aty$trial; aty$run<-NULL;aty$ID<-NULL;aty$trial<-NULL;
+    aty[[1]]<-as.numeric(scale(aty[[1]]))
+    df_to_merge<-merge(df_to_merge,aty,by = c("FullID","Run","TrialNum"),all.x = T)
+  }  
+  df1_admin1_wTSBETA<-df_to_merge      
 }
+ 
+ 
+  
+ 
+ 
+ 
+ 
 
