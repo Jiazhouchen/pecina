@@ -5,7 +5,7 @@
 #Check required packages:
 rm(list = ls())
 require("devtools")
-devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",force = F,quiet = T,ask = FALSE)
+devtools::install_github("DecisionNeurosciencePsychopathology/fMRI_R",force = F)
 library(fslpipe)
 if("dependlab" %in% installed.packages()){"GREAT, DEPENDLAB PACK IS INSTALLED"}else{devtools::install_github("PennStateDEPENdLab/dependlab",force=F)}
 source('pecina_R_utility_function.R')
@@ -18,7 +18,7 @@ runQC<-F
 ######
 #Actual arguments for each model. Should follow template: github.com/DecisionNeurosciencePsychopathology/fMRI_R
 ####BE AWARE!
-argu<-as.environment(list(nprocess=11,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
+argu<-as.environment(list(nprocess=4,run_steps=3:5,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/nfb.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa1/nfb/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
                           group_id_sep=NULL,regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
@@ -29,6 +29,12 @@ argu<-as.environment(list(nprocess=11,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/
                           glvl_output="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",ifoverwrite_secondlvl=FALSE,hig_lvl_path_filter=NULL,
                           graphic.threshold=0.95,nuisa_motion=c("nuisance","motion_par"),motion_type="fd", motion_threshold="default",convlv_nuisa=F))
 #DO NOT PROVIDE THOSE TWO AND IT WILL BE FINE;
+#We are refiting lvl2
+argu$lvl2_prep_refit<-T
+argu$lvl2_overwrite<-T
+argu$lvl3_overwrite<-T
+argu$lvl2_force_prep<-T
+#argu$lvl3_type<-"flame"
 #argu$thresh_cluster_extent<-3.1 
 #argu$thresh_cluster_mass<-3.1
 argu$cfg<-cfg_info(cfgpath = argu$cfgpath)
@@ -40,10 +46,11 @@ argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabl
 ValuePE_FixPara_Int<-F
 ValuePE_u_Int<-F
 BehModel_GM_new<-F
+PreValuePE_FixPara<-T
 ValuePE_FixPara<-F
 Fb<-F
 ValuePE<-F
-BehModel_GM<-T
+BehModel_GM<-F
 exp_rating<- F
 PlacInReinf<-F
 ReinfInPlac<-F
@@ -68,6 +75,21 @@ if(ValuePE_u_Int){
   argu$adminfilter=1
 }
 
+if(PreValuePE_FixPara){
+  argu$model.name="PreValuePE_FixPara"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_PreValuePE_fixPara.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
+
+if(ValuePE_FixPara){
+  argu$model.name="ValuePE_FixPara"
+  argu$gridpath="/Volumes/bek/neurofeedback/scripts/pecina/grid_ValuePE_fixPara.csv"
+  argu$centerscaleall=TRUE
+  argu$proc_id_subs="_a"
+  argu$adminfilter=1
+}
 
 if(ValuePE_FixPara){
   argu$model.name="ValuePE_FixPara"
@@ -195,8 +217,9 @@ if(F){
   argu$old_onlyrun -> argu$onlyrun
 }
 ##################################
+#stop()
  if(runPIPE){
-stop("DIDN'T WORK!")
+
 if(runQC){
   cfg<-cfg_info(cfgpath = argu$cfgpath)
   info_qc<-QC_pipe(cfgpath=argu$cfgpath,QC_func="prep.son1",supplylist = son1_rework,hdtemplate=argu$templatedir,
@@ -252,41 +275,11 @@ if(F) {
                                 basemask="tstat",corrp_mask="tfce",saveclustermap=TRUE,Version="tfce_095_95",corrmaskthreshold=0.95,
                                 roimaskthreshold=0.0001, voxelnumthres=0, clustertoget=NULL,copetoget=c(10,7),maxcore=6)
   
-  # for(x in names(valuePE_roi)){
-  #   names(valuePE_roi[[x]]$roivalues)<-paste0(x,"_",names(valuePE_roi[[x]]$roivalues))
-  #   
-  # }
+  ValuePE_FixPara_Flame <- roi_getvalue(grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",glvl_method="FLAME",
+                                        modelname="ValuePE_FixPara",maxcore = 6)
   
-  ValuePE_FixPara_roi<-lapply(ValuePE_FixPara_roi,function(xrz){
-    xr<-xrz$roivalues
-    if(!is.null(xr)){
-   # print(names(xr))
-    ID_var <- names(xr)[grepl("ID",names(xr))]
-    xr_var <- names(xr)[!grepl("ID",names(xr))]
-    xr_num <- xr[xr_var]
-    ID <- xr[ID_var]
-      xrz$roivalues<-cbind(ID,as.data.frame(apply(xr_num,2,as.numeric)))
-    } else{xrz<-NULL}
-    return(xrz)
-  })
-  #Example:
-  df<-ValuePE_FixPara_roi$cope_7$roivalues #take the output, cope 7, 
-  #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
-  df$FullID<-paste0(df$ID,"_1") #make full ID
-  df1_admin1_wroi<-merge(df1_admin1,df,by = "FullID",all = T)
- 
-  #Example:
-  df1<-ValuePE_FixPara_roi$cope_10$roivalues #take the output, cope 7, 
-  #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
-  df1$FullID<-paste0(df$ID,"_1") #make full ID
-  ValuePE_FixPara_roi<-merge(df1_admin1_wroi,df1,by = "FullID",all = T)
-  names(df1_admin1_wroi)
-  
-  df2<-valuePE_roi$cope_10$roivalues #take the output, cope 7, 
-  #df<-df[c("cluster_3","ID")] #take only cluster 3 and ID
-  df1$FullID<-paste0(df$ID,"_1") #make full ID
-  df1_admin1_wroi<-merge(df1_admin1_wroi,df1,by = "FullID",all = T)
-  names(df1_admin1_wroi)
+  BehModel_GM_Flame <- roi_getvalue(grproot="/Volumes/bek/neurofeedback/sonrisa1/nfb/grpanal/fsl",glvl_method="FLAME",
+                                        modelname="BehModel_GM",maxcore = 6)
   
   #PCA ANALYSIS#################
   library(corrplot)
@@ -330,42 +323,135 @@ if(F) {
   #atlasquery -a "MNI Structural Atlas" -m "OneSampT_tfce_corrp_tstat1.nii.gz"
   
   
-  #FA#########################
-  whichcope<-"cope_7"
-  xr<-valuePE_roi[[whichcope]]$roivalues
+  #FA_contingency#########################
+  whichcope<-"contingency_feedback"
+  xr<-BehModel_GM_Flame[[whichcope]]$roivalues;xr$LVL2_NAME<-NULL;xr$LVL1_NAME<-NULL;
   roiID<-paste0(xr[,grepl("ID",names(xr))],"_1")
-  just_rois<-xr[,!grepl("ID",names(xr))]
-  just_rois<-data.matrix(just_rois, rownames.force = NA)
-  clust_cor <- cor(just_rois,method = 'pearson')
+  just_rois_cont<-xr[,!grepl("ID",names(xr))]
+  just_rois_cont<-data.matrix(just_rois_cont, rownames.force = NA)
+  clust_cor_cont <- cor(just_rois_cont,method = 'pearson')
   
   setwd('~/Desktop/')
-  pdf("Value_cluster_corr_fixed.pdf", width=12, height=12)
-  corrplot(clust_cor, cl.lim=c(-1,1),
+  pdf("Contingency_cluster_corr_fixed.pdf", width=12, height=12)
+  corrplot(clust_cor_cont, cl.lim=c(-1,1),
            method = "circle", tl.cex = 1.5, type = "upper", tl.col = 'black',
            order = "hclust", diag = FALSE,
            addCoef.col="black", addCoefasPercent = FALSE,
-           p.mat = 1-clust_cor, sig.level=0.75, insig = "blank")
+           p.mat = 1-clust_cor_cont, sig.level=0.75, insig = "blank")
   dev.off()
   library(psych)
   #test the number of factors
-  fa.parallel(just_rois)
-  vss(just_rois)
+  colnames(just_rois_cont)
+  colnames(just_rois_cont)[10] <- "PCC_l" 
+  colnames(just_rois_cont)[9] <- "middle_frontal_gyrus_l"
+  colnames(just_rois_cont)[8] <- "frontal_pole_l"
+  colnames(just_rois_cont)[7] <- "cerebellum"
+  colnames(just_rois_cont)[6] <- "thalamus_caudate_l"
+  colnames(just_rois_cont)[5] <- "thalamus_r"
+  colnames(just_rois_cont)[4] <- "caudate_accumbens_r"
+  colnames(just_rois_cont)[3] <- "cerebellum2"
+  colnames(just_rois_cont)[2] <- "middle_frontal_gyrus_r"
+  colnames(just_rois_cont)[1] <- "occipital_temporal_parietal"
+  
+  head(just_rois_cont)
+  fa.parallel(just_rois_cont)
+  vss(just_rois_cont) 
   #Factor analyze
-  mvalue <- nfactors(clust_cor, n=5, rotate = "oblimin", diagonal = FALSE,fm = "mle", n.obs = 35, SMC = FALSE)
-  value.fa = psych::fa(just_rois, nfactors=3, rotate = "oblimin", fm = "mle")
-  fa.diagram(value.fa)
-  fscores <- factor.scores(just_rois, pe.fa)$scores
+  mvalue <- nfactors(clust_cor_cont, n=3, rotate = "oblimin", diagonal = FALSE,fm = "mle", n.obs = 40, SMC = FALSE)
+  value.fa = psych::fa(just_rois_cont, nfactors=3, rotate = "oblimin", fm = "mle")
+  fa.diagram (value.fa)
+  fscores_cont <- factor.scores(just_rois_cont, f = value.fa)$scores
   # write  factor scores to your dataframe
-  FA_df<-as.data.frame(fscores)
+  FA_df<-as.data.frame(fscores_cont)
   names(FA_df)<-paste(names(FA_df),whichcope,sep = "_")
-  df1_admin1_wFA<-merge(df1_admin1_wroi,cbind(roiID,FA_df),by.x = "FullID",by.y = "roiID",all = T)
+  df1_admin1_wFA<-merge(df1_admin1,cbind(roiID,FA_df),by.x = "FullID",by.y = "roiID",all = T)
   
-  FA_df<-as.data.frame(fscores)
-  names(FA_df)<-paste(names(FA_df),whichcope,sep = "_")
-  df1_admin1_wFA<-merge(df1_admin1_wFA,cbind(roiID,FA_df),by.x = "FullID",by.y = "roiID",all = T)
+  #FA_infusion#########################
+  whichcope<-"inf_noinf_infusion"
+  xr<-BehModel_GM_Flame[[whichcope]]$roivalues;xr$LVL2_NAME<-NULL;xr$LVL1_NAME<-NULL;
+  roiID<-paste0(xr[,grepl("ID",names(xr))],"_1")
+  just_rois_inf<-xr[,!grepl("ID",names(xr))]
+  just_rois_inf<-data.matrix(just_rois_inf, rownames.force = NA)
+  clust_cor_inf <- cor(just_rois_inf,method = 'pearson')
+  
+  setwd('~/Desktop/')
+  pdf("Infusion_cluster_corr_fixed.pdf", width=12, height=12)
+  corrplot(clust_cor_inf, cl.lim=c(-1,1),
+           method = "circle", tl.cex = 1.5, type = "upper", tl.col = 'black',
+           order = "hclust", diag = FALSE,
+           addCoef.col="black", addCoefasPercent = FALSE,
+           p.mat = 1-clust_cor_inf, sig.level=0.75, insig = "blank")
+  dev.off()
+  library(psych)
+  #test the number of factors
+  colnames(just_rois_inf)
+  colnames(just_rois_inf)[5] <- "temporal_r"
+  colnames(just_rois_inf)[4] <- "middle_frontal_gyrus_l"
+  colnames(just_rois_inf)[3] <- "middle_frontal_gyrus_r"
+  colnames(just_rois_inf)[2] <- "occipital_parietal_r"
+  colnames(just_rois_inf)[1] <- "occipital_parietal_l"
+  
+  head(just_rois_inf)
+  fa.parallel(just_rois_inf)
+  vss(just_rois_inf) 
+  #Factor analyze
+  mvalue <- nfactors(clust_cor_inf, n=1, rotate = "oblimin", diagonal = FALSE,fm = "mle", n.obs = 40, SMC = FALSE)
+  value.fa = psych::fa(just_rois_inf, nfactors=2, rotate = "oblimin", fm = "mle")
+  fa.diagram (value.fa)
+  fscores_inf <- factor.scores(just_rois_inf, f = value.fa)$scores
+  # write  factor scores to your dataframe
+  FA_df_inf<-as.data.frame(fscores_inf)
+  names(FA_df_inf)<-paste(names(FA_df_inf),whichcope,sep = "_")
+  df1_admin1_wFA<-merge(df1_admin1_wFA,cbind(roiID,FA_df_inf),by.x = "FullID",by.y = "roiID",all = T)
   
   
-  ##!!!!!GETTING TIME SERIRES IS TIME CONSUMING AND SHOULD CONSIDER SAVING THE RESULTS!!!#
+  #FA_value#########################
+  whichcope<-"Value_ExpRat"
+  xr<-ValuePE_FixPara_Flame[[whichcope]]$roivalues;xr$LVL2_NAME<-NULL;xr$LVL1_NAME<-NULL;
+  roiID<-paste0(xr[,grepl("ID",names(xr))],"_1")
+  just_rois_Value_ExpRat<-xr[,!grepl("ID",names(xr))]
+  just_rois_Value_ExpRat<-data.matrix(just_rois_Value_ExpRat, rownames.force = NA)
+  clust_cor_Value_ExpRat <- cor(just_rois_Value_ExpRat,method = 'pearson')
+  
+  setwd('~/Desktop/')
+  pdf("Value_ExpRat_cluster_corr_fixed.pdf", width=12, height=12)
+  corrplot(clust_cor_Value_ExpRat, cl.lim=c(-1,1),
+           method = "circle", tl.cex = 1.5, type = "upper", tl.col = 'black',
+           order = "hclust", diag = FALSE,
+           addCoef.col="black", addCoefasPercent = FALSE,
+           p.mat = 1-clust_cor_Value_ExpRat, sig.level=0.75, insig = "blank")
+  dev.off()
+  library(psych)
+  #test the number of factors
+  colnames(just_rois_Value_ExpRat)
+  colnames(just_rois_Value_ExpRat)[12] <- "occipital_fusiform_gyrus_l"
+  colnames(just_rois_Value_ExpRat)[11] <- "dorsal_ACC_l"
+  colnames(just_rois_Value_ExpRat)[10] <- "thalamus_r"
+  colnames(just_rois_Value_ExpRat)[9] <- "thalamus_l"
+  colnames(just_rois_Value_ExpRat)[8] <- "superior_temporal_gyrus_l"
+  colnames(just_rois_Value_ExpRat)[7] <- "brainstem"
+  colnames(just_rois_Value_ExpRat)[6] <- "angular_gyrus_r"
+  colnames(just_rois_Value_ExpRat)[5] <- "superior_frontal_gyrus_r"
+  colnames(just_rois_Value_ExpRat)[4] <- "mid_cingulate_cortex"
+  colnames(just_rois_Value_ExpRat)[3] <- "caudate_accumbens_r"
+  colnames(just_rois_Value_ExpRat)[2] <- "postcentralgyrus_l"
+  colnames(just_rois_Value_ExpRat)[1] <- "caudate_antinsula_l"
+  
+  head(just_rois_Value_ExpRat)
+  fa.parallel(just_rois_Value_ExpRat)
+  vss(just_rois_Value_ExpRat) 
+  #Factor analyze
+  mvalue <- nfactors(clust_cor_Value_ExpRat, n=3, rotate = "oblimin", diagonal = FALSE,fm = "mle", n.obs = 40, SMC = FALSE)
+  value.fa = psych::fa(just_rois_Value_ExpRat, nfactors=3, rotate = "oblimin", fm = "mle")
+  fa.diagram (value.fa)
+  fscores_Value_ExpRat <- factor.scores(just_rois_Value_ExpRat, f = value.fa)$scores
+  # write  factor scores to your dataframe
+  FA_df_Value_ExpRat<-as.data.frame(fscores_Value_ExpRat)
+  names(FA_df_Value_ExpRat)<-paste(names(FA_df_Value_ExpRat),whichcope,sep = "_")
+  df1_admin1_wFA<-merge(df1_admin1_wFA,cbind(roiID,FA_df_Value_ExpRat),by.x = "FullID",by.y = "roiID",all = T)
+  
+  
+  ##!!!!!GETTING TIME SERIRES IS TIME CONSUMING AND SHOULD CONSIDER SAVING THE RESULTS!!!#######
   ###Cope 7: 100 (VS), 86 (mPFC), 76 (rACC), 71 (vlPFC), 73 (lOFC).
   ###Cope 10: 87 (VS), 78 (lOFC)
   if(file.exists("allcpcl.rdata")){load("allcpcl.rdata")}else{
@@ -415,10 +501,6 @@ if(F) {
   }  
   df1_admin1_wTSBETA<-df_to_merge      
 }
- 
- 
-  
- 
  
  
  

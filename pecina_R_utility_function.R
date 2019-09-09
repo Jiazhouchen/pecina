@@ -339,6 +339,9 @@ prep.confram<-function(singlesub=NULL) {
   conframe$ContextFearful[conframe$Context=="Pleasant" & conframe$Emotion=="Fearful"]<- 1
   conframe$ContextFearful[conframe$Context=="Unpleasant" & conframe$Emotion=="Fearful"]<- (-1)
   
+
+
+
   conframe$Congruent<-0
   conframe$Congruent[conframe$Context=="Unpleasant" & conframe$Emotion=="Fearful"]<- 1
   conframe$Congruent[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<- 1
@@ -347,6 +350,24 @@ prep.confram<-function(singlesub=NULL) {
   conframe$Incongruent[conframe$Context=="Unpleasant" & conframe$Emotion=="Happy"]<- 1
   conframe$Incongruent[conframe$Context=="Pleasant" & conframe$Emotion=="Fearful"]<- 1
 
+  conframe$NewtwoEmotion<- 0
+  conframe$NewtwoEmotion[conframe$Emotion %in% "Happy"]<- 1
+  conframe$NewtwoEmotion[conframe$Emotion %in% c("Neutral","Fearful")]<- (-1)
+
+  conframe$Incongruent <- 1 
+  conframe$Incongruent[conframe$Context=="Unpleasant" & conframe$Emotion=="Fearful"]<- 0
+  conframe$Incongruent[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<- 0
+  
+  conframe$IncongruentPN <- 1
+  conframe$IncongruentPN[conframe$Context=="Unpleasant" & conframe$Emotion=="Fearful"]<- (-1)
+  conframe$IncongruentPN[conframe$Context=="Pleasant" & conframe$Emotion=="Happy"]<- (-1)
+  
+  conframe$NewtwoEmotionZO<- 0
+  conframe$NewtwoEmotionZO[conframe$Emotion %in% "Happy"]<- 1
+  #conframe$NewtwoEmotionZO[conframe$Emotion %in% c("Neutral","Fearful")]<- (0)
+
+  conframe$InteractionNewEmoInc <- conframe$Incongruent * conframe$NewtwoEmotion
+  conframe$InteractionNewEmoIncNG <- conframe$IncongruentPN * conframe$NewtwoEmotionZO
   
   finalist<-list(trial=data.frame(event="trial",
                                   onset=conframe$ContextOnset,
@@ -361,20 +382,7 @@ prep.confram<-function(singlesub=NULL) {
   )
   
   finalist[["allconcat"]]<-finalist$trial
-  vba<-list(PxH=conframe$PxH,
-            PxF=conframe$PxF,
-            PxN=conframe$PxN,
-            UxH=conframe$UxH,
-            UxF=conframe$UxF,
-            UxN=conframe$UxN,
-            Emotion=conframe$EmotionReg,
-            EmotionHappy=conframe$EmotionHappy,
-            EmotionFearful=conframe$EmotionFearful,
-            Context=conframe$ContextReg,
-            ContextHappy=conframe$ContextHappy,
-            ContextFearful=conframe$ContextFearful,
-            Congruent=conframe$Congruent,
-            Incongruent=conframe$Incongruent)
+  vba<-as.list(conframe)
   
   
   output<-list(event.list=finalist,output.df=conframe,value=vba)

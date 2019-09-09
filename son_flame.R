@@ -36,11 +36,7 @@ for(lx in 1:length(default_ls)){
 }
 argu<-list2env(default_ls,envir = argu)
 
-pasteFSF<-function(fsfvari="",value="",addComment=NULL,quotevalue=F,featfile=F){
-  if(quotevalue) {value<-paste0("\"",value,"\"")}
-  if(featfile) {syx<-"feat_files("} else {syx<-"fmri("}
-  c(addComment,paste0("set ",syx,fsfvari,")"," ",value))
-}
+
 
 
 #Do the single entry ones;
@@ -61,7 +57,6 @@ if("Intercept" %in% argu$grouplevel_var){
   gvar_df<-argu$grouplevel_df[c("ID",argu$grouplevel_var[!argu$grouplevel_var %in% "Intercept"])]
   gvar_df$Intercept <- 1
   if(is.null(gvar_df$Group_Membership)) {gvar_df$Group_Membership<-1}
-
 }
 
 #new func;
@@ -81,8 +76,8 @@ allcope_df<-do.call(rbind,lapply(raw.split,function(x){
 })
 )
 
-copenum = 1
-alldf<-lapply(6:13,function(copenum){
+#copenum = 1
+alldf<-lapply(unique(as.numeric(allcope_df$COPENUM)),function(copenum){
   subcopedf <- allcope_df[which(allcope_df$COPENUM==copenum),]
   gvar_cope_df <- merge(gvar_df,subcopedf,by = "ID",all.x = T)
   
@@ -145,10 +140,13 @@ alldf<-lapply(6:13,function(copenum){
                pasteFSF(fsfvari = "outputdir",value = file.path(argu$glvl_output,argu$model.name,argu$grid$name[copenum]),addComment = "# Output directory",quotevalue = T),
                Head_text,Groupinput_text,Ev_text,Contrast_text)
   dir.create(file.path(argu$glvl_output,argu$model.name,"fsf_files"),recursive = T,showWarnings = F)
-  writeLines(fsf_final,file.path(argu$glvl_output,argu$model.name,"fsf_files",paste0("grouplvl_",argu$grid$name[copenum],"grouplvl.fsf")))
+  writeLines(fsf_final,file.path(argu$glvl_output,argu$model.name,"fsf_files",paste0(argu$grid$name[copenum],".fsf")))
   return(gvar_cope_df)
 })
 
+
+stop()
+#Actually running it;
 library(parallel)
 fsf_ls<-list.files(path = file.path(argu$glvl_output,argu$model.name,"fsf_files"),pattern = ".*.fsf",full.names = T,recursive = F)
 cl_glvl<-parallel::makeCluster(argu$nprocess,type = "FORK")
@@ -164,6 +162,21 @@ NX<-parallel::parLapply(cl_glvl,fsf_ls,function(yx) {
 })
 parallel::stopCluster(cl_glvl)
 
+
+#Transform them into afni for better viewing...
+gxroot<-unique(file.path(dirname(dirname(fsf_ls)),"afni_view"))
+dir.create(gxroot,recursive = T,showWarnings = F)
+file.copy(from = argu$templatedir,to = file.path(unique(file.path(dirname(dirname(fsf_ls)),"afni_view")),"template_brain.nii"),overwrite = T)
+
+#system.file("extdata", "my_raw_data.csv", package="my_package")
+oldwd<-getwd()
+setwd("./source_script")
+for (fsf in fsf_ls){
+  system(paste0("Rscript feat_lvl2_to_afni.R --gfeat_dir ", file.path(argu$glvl_output,argu$model.name,gsub(".fsf",".gfeat",basename(fsf)))
+                , " --no_subjstats --no_varcope --stat_outfile ", file.path(gxroot,gsub(".fsf","_gfeat_stats",basename(fsf)))
+               ))
+}
+setwd(oldwd)
 
 
 

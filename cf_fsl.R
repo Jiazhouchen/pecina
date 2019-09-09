@@ -17,12 +17,12 @@ fsl_2_sys_env()
 #boxdir<-findbox()
 boxdir <- "~/Box"
 #Setting default options
-argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
+argu<-as.environment(list(nprocess=5,run_steps=NULL,forcereg=F,cfgpath="/Volumes/bek/autopreprocessing_pipeline/Neurofeedback/con_framing.cfg",
                           regpath="/Volumes/bek/neurofeedback/sonrisa2/con_framing/regs/R_fsl_reg",func.nii.name="nfswudktm*[0-9]_[0-9].nii.gz",
-                          group_id_sep=c('Nalt','Plac'),regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
+                          regtype=".1D", convlv_nuisa=FALSE,adaptive_gfeat=TRUE,adaptive_ssfeat=TRUE,randomize_demean=FALSE,
                           gsub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_gfeat_general_adaptive_template.fsf",
                           ssub_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/ssanalysis/fsl",centerscaleall=FALSE,
-                          glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/grpanal/fsl",
+                          glvl_outputroot="/Volumes/bek/neurofeedback/sonrisa2/con_framing/grpanal/fsl",higherleveltype='flame',
                           templatedir="/Volumes/bek/Newtemplate_may18/fsl_mni152/MNI152_T1_2mm_brain.nii",whichttest = c("paired","onesample"),
                           ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_ssfeat_general_adaptive_template_R.fsf",
                           glvl_output="/Volumes/bek/neurofeedback/sonrisa2/con_framing/grpanal/fsl",ifoverwrite_secondlvl=FALSE,hig_lvl_path_filter=NULL,
@@ -33,17 +33,31 @@ argu<-as.environment(list(nprocess=10,onlyrun=NULL,forcereg=F,cfgpath="/Volumes/
 argu$cfg<-cfg_info(cfgpath = argu$cfgpath)
 argu$randomize_p_threshold<-0.001
 argu$randomize_thresholdingways<-c("tfce","voxel-based","cluster-based-mass","cluster-based-extent")
-argu$ss_zthreshold<-3.2  #This controls the single subject z threshold (if enabled in template)
+argu$ss_zthreshold<-3.05  #This controls the single subject z threshold (if enabled in template)
 argu$ss_pthreshold<-0.05 #This controls the single subject p threshold (if enabled in template)
-
+argu$ifoverwrite_secondlvl<-T
+#We are refiting lvl2
+argu$lvl2_prep_refit<-T
+argu$lvl2_overwrite<-T
 #Which model to run:
 M_base=FALSE
 M_Value=FALSE
 M_GM<-FALSE
 M_GMa<-FALSE
-M_inC<-FALSE
-M_nx<-TRUE
+M_inC<-F
+M_nx<-FALSE
+M_inCEmo<-T
 #Differentiate argument for different models here:
+if (M_inC) {
+  argu$gridpath<-"grid_sc_NEWinc.csv"
+  argu$model.name="Model_Congruency"
+}
+
+if (M_inCEmo) {
+  argu$gridpath<-"grid_sc_NEWincZG.csv"
+  argu$model.name="Model_Congruency_NoInteraction"
+}
+
 
 if (M_GM) {
   argu$gridpath<-"grid_sc_gm.csv"
@@ -66,14 +80,7 @@ if (M_GMa) { #none ordinal
                          "Trial")
   argu$ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_cf_gma_template_R.fsf"
 }
-if (M_inC) {
-  argu$gridpath<-"grid_sc_inc.csv"
-  argu$model.name="cf_inC"
-  argu$model.varinames=c("Congruent",        
-                         "Incongruent",
-                         "Trial")
-  argu$ssub_fsl_templatepath="/Volumes/bek/neurofeedback/scripts/fsl/templates/fsl_cf_inc_template_R.fsf"
-}
+
 if (M_nx) {
   argu$gridpath<-"grid_cf_nx.csv"
   argu$model.name="NoInteraction"
@@ -82,7 +89,7 @@ if (M_nx) {
 #Get behavioral data
 datalist<-proc_behav_cf(boxdir = boxdir,fmriproc = T)
 
-
+datalist<-datalist[grepl("_Plac",datalist)]
                                   #Run fsl_pipe
 fslpipe::fsl_pipe(argu=argu,
          prep.call.func="prep.confram", #This should be a character string that's the name of the prep proc function
